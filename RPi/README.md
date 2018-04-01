@@ -16,6 +16,9 @@ apt-get install hostapd dnsmasq wpasupplicant
 
 # install Tinc p2p VPN
 apt-get install tinc
+
+# install usb_modeswitch for initializing 4G dongle
+apt-get install usb-modeswitch
 ```
 
 ## Configuration
@@ -215,4 +218,28 @@ iptables -L -n -t nat
 
 # make rules persistent
 apt-get install iptables-persistent
+
+### configure mode switching for 4G USB dongle
+
+# NB! The following vendor/product IDs are specific to Huawei 3372h-153 dongle
+# You may need to alter these according to your model
+
+# unpack hw profiles
+cd /usr/share/usb_modeswitch/
+tar xvzf configPack.tar.gz
+
+# disable auto-modeswitching by usb_modeswitch wrapper 
+# which did not work for me correctly
+sed -i.bak 's/^DisableSwitching=0/DisableSwitching=1/' /etc/usb_modeswitch.conf
+
+# enable logging for debugging
+sed -i.bak 's/^EnableLogging=0/EnableLogging=1/' /etc/usb_modeswitch.conf
+
+# test dongle modeswitching manually (switching from storage to router mode)
+usb_modeswitch -J -v 0x12d1 -p 0x157d
+
+# automate and make persistent (hot-pluggable)
+cat << 'EOF' > /etc/udev/rules.d/70-hawei-e3372h-153.rules
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="157d", RUN+="/usr/sbin/usb_modeswitch -J -v 0x12d1 -p 0x157d"
+EOF
 ```
