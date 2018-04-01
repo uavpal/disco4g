@@ -1,0 +1,28 @@
+Watch https://www.youtube.com/watch?v=1Txyy7Xstms :)
+
+Create an account at https://developer.glympse.com/ an get a free API key (required for GPS real-time location tracking)
+Get a free hostname (for the Disco's MNO internal IP) from https://www.noip.com/
+
+Hardware required:
+- Huawei E3372h 4G USB Modem with antennas (and re-flash it to E3372s) - certainly easier to get a s-version straight-away. 
+- short USB OTG cable
+- SIM card
+- Mobile phone with Wi-Fi tethering
+- Raspberry Pi 3
+- TL-WN723N USB Wi-Fi Module
+- Portable USB battery
+- recommended, but optional: USB Ethernet Adapter (Apple MC704ZM/A works)
+
+Please see the indvidual Disco_install.txt, RPi3_install.txt, SC2_install.txt
+
+you will not need all binaries/modules provided for SC2/Disco. Some come in handy for debugging and testing.
+
+Disclaimer:
+This is still a dirty hack. No clean-up has been done yet.
+
+Major todos:
+- add basic error handling
+- add reconnect (lte-ppp, and tcptunnel-ppp)
+- move variables to single properties file, no hard-coded values in scripts
+- add iptables on the disco (currently all ports are open on all interfaces, someone on the same mobile network can telnet into the Disco without password!!! - workaround: killall telnetd && /usr/sbin/telnetd -F -b 192.168.42.1 -l /bin/login.sh &)
+- add comments to the scripts and make scripts human readable :)
