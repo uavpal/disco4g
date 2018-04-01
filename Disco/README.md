@@ -5,7 +5,7 @@ TODO
 ## Installation
 
 ```bash
-# upload lte subtree to Disco /data/ftp/internal000 directory via ftp
+# upload lte/ subtree to Disco internal000 directory via ftp
 
 # telnet to Disco
 telnet 192.168.42.1

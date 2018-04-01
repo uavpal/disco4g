@@ -59,6 +59,7 @@ systemctl status tinc
 
 # enable on boot
 systemctl enable tinc
+systemctl enable tinc@vpn0.service
 
 # NB! You may need to set also firewall rules, depending on your server provider and VM OS configuration
 # tcp/655

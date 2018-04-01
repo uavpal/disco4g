@@ -106,7 +106,7 @@ systemctl restart dnsmasq
 
 ### add ardiscovery.service to avahi-daemon
 
-# lookup device_id PIXXXXXXXXXXXXXXXY from Disco avahi_daemon and increment Y by +1
+# lookup device_id PIXXXXXXXXXXXXXXXY from FFP app (or from Disco avahi_daemon configuration) and increment Y by +1
 # and use PISCO_ID as name
 cat << 'EOF' > /etc/avahi/services/ardiscovery.service
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
@@ -195,6 +195,7 @@ systemctl status tinc
 
 # enable on boot
 systemctl enable tinc
+systemctl enable tinc@vpn0.service
 
 
 ### setup 1:1 NAT rules
