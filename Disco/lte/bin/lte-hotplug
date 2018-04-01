@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# NB! Please review and change the following lines according to your exact 4G dongle details!
+# Current parameters used are for Huawei 3372h-153 4G dongle to switch it into router mode
+# 4G dongle IP subnet may differ also - test it by plugging it into normal laptop, etc.
+# Usually dongle gw IP is 192.168.X.1 - where X may differ
+# eth1 IP can be arbitrary - just on the same subnet that dongle offers
+# Please do not change route metric value unless you know what you are doing 
+
+# switch dongle from mass storage to router mode
+/data/ftp/internal_000/lte/bin/usb_modeswitch -J -v 0x12d1 -p 0x157d -c /data/ftp/internal_000/lte/etc/usb_modeswitch.conf
+# wait usb device to reconnect and settle
+sleep 5
+
+# configure router client interface and default route
+ifconfig eth1 192.168.8.100 netmask 255.255.255.0
+ip route add default via 192.168.8.1 dev eth1 metric 209
+
+# start tinc VPN
+sh -c "/data/ftp/internal_000/lte/bin/tincd-init"
+
+exit 0

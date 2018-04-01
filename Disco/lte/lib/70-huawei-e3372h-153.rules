@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="157d", RUN+="/data/ftp/internal_000/lte/bin/lte-hotplug"
