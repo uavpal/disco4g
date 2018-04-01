@@ -204,6 +204,10 @@ DISCO_VPN_IPADDR="10.0.0.2"
 RPI_VPN_IPADDR="10.0.0.3"
 SC2_IPADDR="192.168.42.50"
 
+# NB! Enable ip forwarding!!!
+sed -i.bak 's/#net.ipv4.ip_forward/net.ipv4.ip_forward/g' /etc/sysctl.conf
+sysctl -p /etc/sysctl.conf
+
 # clear ALL existing iptables rules 
 iptables -F
 iptables -F -t nat
