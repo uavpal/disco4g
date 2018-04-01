@@ -39,6 +39,8 @@ TODOs:
 
 ## Theory of Operation
 
+![lte mod diagram](images/lte-mod-diagram.png)
+
 TODO
 
 ## Installation instructions
