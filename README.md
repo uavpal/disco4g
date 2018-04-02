@@ -6,6 +6,8 @@ What needs to be modded:
 * Disco firmware
 * SkyController 2 firmware (optional)
 
+P.S. This mod might be potentially useful also for Parrot Bebop 2 owners - as these drones share quite a lot. But just a wild guess atm ... :)
+
 ## Parrot Disco over LTE/4G Demo (Youtube)
 
 [![Parrot Disco over LTE/4G Demo](https://img.youtube.com/vi/1Txyy7Xstms/0.jpg)](https://www.youtube.com/watch?v=1Txyy7Xstms)

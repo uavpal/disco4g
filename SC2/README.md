@@ -1,6 +1,6 @@
 # About SkyController 2 firmware mod for LTE/4G
 
-TODO
+Current (optional but highly recommended) SC2 firmware mod does only one thing: it changes SC2 led to output blue light when connected to Disco drone over 4G datalink.
 
 ## Installation
 
@@ -39,5 +39,5 @@ exit
 # disconnect adb
 adb disconnect $SC2_IPADDR:9050
 
-# power off/on SC2 for raspibridge to start
+# power off/on SC2 for raspibridge service to start
 ```
