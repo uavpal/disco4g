@@ -106,6 +106,10 @@ systemctl restart dnsmasq
 
 ### add ardiscovery.service to avahi-daemon
 
+# set hostname to PISCO_ID
+hostnamectl set-hostname $PISCO_ID
+echo "192.168.42.1 $PISCO_ID.local" >> /etc/avahi/hosts
+
 # lookup device_id PIXXXXXXXXXXXXXXXY from FFP app (or from Disco avahi_daemon configuration) and increment Y by +1
 # and use PISCO_ID as name
 cat << 'EOF' > /etc/avahi/services/ardiscovery.service
