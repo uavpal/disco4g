@@ -41,7 +41,11 @@ TODOs:
 
 ![lte mod diagram](images/lte-mod-diagram.png)
 
-TODO
+* RPi acts as a Wifi Access Point simulating Parrot Disco drone for SkyController 2 (and for Free Flight Pro app)
+* RPi then forwards all SC2/FFP traffic to/from real Disco over 4G datalink - once SC2 connects to RPi AP
+* In order for 4G datalink to work over NATed connections (normally the case with 4G connections) Peer-to-Peer VPN layer is used - that handles NAT traversal and falls back to stream proxying via mediator server - if other methods for achieving direct streams will not work
+* P2P VPN Server with public IP has two objectives: to exchange clients connection information and to try achieve direct p2p connections between them -- and support failback to simple proxying
+* Disco drone has USB 4G dongle onboard, connected to CHUCK - and can talk to SC2/FFP over 4G when drone profile is switched to RPi "fake drone" (from FFP app)
 
 ## Installation instructions
 
