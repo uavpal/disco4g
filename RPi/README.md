@@ -102,10 +102,15 @@ netmask 255.255.255.0
 EOF
 
 # lookup your SC2 macaddr 
-# TODO: how?
+# method 1: telnet 192.168.42.1 (while connected to Disco AP) and run ulogcat while powering on SC2
+# you should see Controller IP & Mac address lines appearing in log output
+# method 2: plug USB ethernet device to SC2 and cable with LAN router
+# use adb to connect and ifconfig to list SC2 wlan interface mac addr
+
+# set SC2 WIFI mac address 
 SC2_MACADDR="a0:14:3d:ce:c2:4f"
 
-# set static IPADDR for SC2
+# set static IPADDR to be assigned to SC2
 SC2_IPADDR="192.168.42.50"
 
 # create dnsmasq dhcp server configuration for PISCO AP
@@ -274,7 +279,7 @@ cat /proc/sys/net/ipv4/ip_forward
 > example output
 1
 
-# clear ALL existing iptables rules (just to be safe that nothing interfares)
+# clear ALL existing iptables rules (just to be safe that nothing interferes)
 iptables -F
 iptables -F -t nat
 
