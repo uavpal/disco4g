@@ -2,7 +2,13 @@
 
 Required to broker VPN clients behind NATed connections that cannot connect directly (which is normally the case with LTE/4G clients). There has to be at least one VPN node with public IP address that other nodes can connect to. Low cost cloud VM with public IP from AWS or DigitalOcean would do. Alternatively you can provide 1:1 NATed public IP address one of the VPN nodes 4G connection (aka disco or rpi) - if your carrier offers this.
 
-TODO
+We are using Tinc for P2P VPN layer: https://www.tinc-vpn.org/
+
+It provides some useful features we rely on:
+*  Encryption, authentication and compression
+*  Automatic full mesh routing
+*  NAT traversal
+*  Runs on many operating systems and supports IPv6
 
 ## Installation
 
