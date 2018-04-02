@@ -1,57 +1,71 @@
 # About Raspberry Pi for LTE/4G mod
 
-TODO
+Currently RPi is required in order to pretend as another Disco drone to SC2 and to setup a network tunnel between RPi and real Disco over 4G (or over any other alternative network link that you can provide and that has sufficient bandwidth). Work for loosing RPi as a "middle-man" and connecting SC2 directly and reliably to Disco over 4G tethering is underway - but as you might guess its more complicated to achieve.
+
+## Development environment
+
+* Connect RPi ethernet interface to LAN router (which provides or forwards LAN DHCP service)
+* Lookup RPi ethernet DHCP lease
+* Connect to RPi via ssh
 
 ## Installation
 
+### Raspbian installation
+
+https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
+
+### General configuration
+
 ```bash
-# install utils
+# install some useful utils
 apt-get install tcpdump telnet nano vim android-tools-adb dnsutils screen ncftp
-
-# install avahi-daemon for PISCO discovery
-apt-get install avahi-daemon
-
-# install software for PISCO Access Point
-apt-get install hostapd dnsmasq wpasupplicant
-
-# install Tinc p2p VPN
-apt-get install tinc
-
-# install usb_modeswitch for initializing 4G dongle
-apt-get install usb-modeswitch
 ```
 
-## Configuration
+### Setup PISCO Access Point (AP)
+
+PISCO AP will simulate another drone for SkyController 2 to discover - which would be the exact same DISCO drone but accessed over 4G datalink.
+SC2 will scan for wifi networks which set Information Element (IE) based on drone serial in wlan info. We are using hostapd software in order to create such AP. In order it to work your WIFI device must support AP mode and setting IE fields. 
+
+More info about suitable WIFI chipsets and drivers can be found here: https://w1.fi/cgit/hostap/plain/hostapd/README 
+RPi3 and hostapd howto: https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
 
 ```bash
-# verify that kernel IP forwarding has been enabled!
-cat /proc/sys/net/ipv4/ip_forward
-> example output
-1
+# first we need to lookup Disco IE field contents
 
 # power ON your Disco
-# AND plug in your RPi USB Wifi dongle
+# AND plug-in your RPi USB Wifi dongle (if not using any built-ins)
 
 # whats is your USB Wifi dongle interface?
+ifconfig -a 
+# set interface variable for later use
 IFACE="wlan0"
 
 # lookup Disco serial from wifi IE field
 DISCO_ID="$( iwlist wlan0 scan | awk '/DISCO/' | cut -d'-' -f2 | tr -d '"' )"
 echo $DISCO_ID
 
+# lookup Disco IE field
 DISCO_ID_PADDED="$( echo $DISCO_ID | fold -w1 | paste -sd'3' - )"
 echo $DISCO_ID_PADDED 
-
 DISCO_IE="$( iwlist wlan0 scan | awk '/'."$DISCO_ID_PADDED".'/ { print $3 }' )"
 echo $DISCO_IE
 
-# NB! Change DISCO to PISCO
-# AND increment last digit of DISCO_ID and 3rd digit from backwards of DISCO_IE by +1 
-# (the Y char in examples)
+# NB! Change DISCO name to PISCO
+# AND increment by +1 last digit of DISCO_ID and 3rd digit from backwards of DISCO_IE value 
+# (increment the Y char in examples)
+
 PISCO_ID="PISCO-XXXXXY"
 PISCO_IE="DDXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXY00"
 
+# install software for creating PISCO Access Point
+apt-get install hostapd dnsmasq wpasupplicant
+
 # create hostapd.conf
+# shell variables required: 
+# IFACE
+# PISCO_ID
+# PISCO_IE
+
 cat << EOF > /etc/hostapd/hostapd.conf
 #AP for PISCO
 interface=$IFACE
@@ -70,7 +84,10 @@ logger_syslog=-1
 logger_syslog_level=1
 EOF
 
-# create wlan interface configuration file
+# create wifi interface configuration file
+# shell variables required:
+# IFACE
+
 cat << EOF > /etc/network/interfaces.d/${IFACE}
 allow-hotplug $IFACE
 auto $IFACE $IFACE:1
@@ -84,14 +101,19 @@ address 192.168.42.1
 netmask 255.255.255.0
 EOF
 
-# lookup your SC2 macaddr from Disco 
-# TODO
+# lookup your SC2 macaddr 
+# TODO: how?
 SC2_MACADDR="a0:14:3d:ce:c2:4f"
 
 # set static IPADDR for SC2
 SC2_IPADDR="192.168.42.50"
 
 # create dnsmasq dhcp server configuration for PISCO AP
+# shell variables required:
+# IFACE
+# SC2_MACADDR
+# SC2_IPADDR
+
 cat << EOF > /etc/dnsmasq.d/pisco-ap.conf
 interface=lo,$IFACE
 no-dhcp-interface=lo
@@ -101,17 +123,29 @@ dhcp-option=3
 dhcp-host=$SC2_MACADDR,$SC2_IPADDR
 EOF
 
-# restart dnsmasq service
+# (re)start dnsmasq service
 systemctl restart dnsmasq
+```
 
-### add ardiscovery.service to avahi-daemon
+### Setup drone discovery over zeroconf 
+
+In order for SC2 to be able to discover simulated PISCO drone we need to setup avahi-daemon with ardiscovery.service drone profile.
+More info about Avahi can be found here: https://www.avahi.org/
+
+```bash
+# install avahi-daemon for PISCO discovery
+apt-get install avahi-daemon
 
 # set hostname to PISCO_ID
+# shell variables required: 
+# PISCO_ID
+
 hostnamectl set-hostname $PISCO_ID
 echo "192.168.42.1 $PISCO_ID.local" >> /etc/avahi/hosts
 
-# lookup device_id PIXXXXXXXXXXXXXXXY from FFP app (or from Disco avahi_daemon configuration) and increment Y by +1
-# and use PISCO_ID as name
+# lookup device_id PIXXXXXXXXXXXXXXXY from FFP app (or from Disco /etc/avahi/avahi_daemon.conf) and increment Y by +1
+# and use PISCO_ID as name field value
+
 cat << 'EOF' > /etc/avahi/services/ardiscovery.service
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
@@ -148,10 +182,15 @@ rlimit-stack=4194304
 rlimit-nproc=3
 EOF
 
-# restart avahi-daemon
+# (re)start avahi-daemon
 systemctl restart avahi-daemon
+```
 
-### create tinc vpn configuration
+### Setup Tinc P2P VPN
+
+```bash
+# install tinc p2p vpn
+apt-get install tinc
 
 # set local node vpn tunnel address
 NODE_VPN_IPADDR="10.0.0.3"
@@ -167,6 +206,9 @@ ConnectTo = cloud
 EOF
 
 # create vpn up script
+# shell variables required: 
+# NODE_VPN_IPADDR
+
 cat << EOF > /etc/tinc/vpn0/tinc-up
 ifconfig \$INTERFACE $NODE_VPN_IPADDR netmask 255.255.255.0
 EOF
@@ -184,9 +226,14 @@ chmod -v +x /etc/tinc/vpn0/tinc-{up,down}
 tincd --net=vpn0 --generate-keys
 
 # setup host vpn ipaddr
+# shell variables required: 
+# NODE_VPN_IPADDR
 sed -i '1 s/^/Subnet = '$NODE_VPN_IPADDR'\/32\n\n/' /etc/tinc/vpn0/hosts/rpi
 
 # NB! Exchange host public keys (ie keys under hosts/ on each node) with other nodes!
+# copy with scp for example (and via ftp for Disco):
+# scp user@othernode:<tinc/hosts path>/* /etc/tinc/vpn0/hosts/
+# scp /etc/tinc/vpn0/hosts/rpi user@othernode:<tinc/hosts path>
 
 # set vpn network to be controlled by init scripts
 echo 'vpn0' >> /etc/tinc/nets.boot
@@ -200,55 +247,134 @@ systemctl status tinc
 # enable on boot
 systemctl enable tinc
 systemctl enable tinc@vpn0.service
+```
 
+### Setup NAT rules
 
-### setup 1:1 NAT rules
+We are using packet mangling DNAT/SNAT rules to direct SC2->PISCO connections to real Disco over 4G tunneling.
 
+Theory of operation:
+* everything sent to 192.168.42.1 (fake PISCO) should be forwarded to DISCO_VPN_IPADDR (ie to real Disco over LTE)
+* everything forwarded to DISCO_VPN_IPADDR should be faked to be sent by RPI_VPN_IPADDR (SC2 fake IP, as seen by real Disco over LTE)
+* everything sent back to RPI_VPN_IPADDR (SC2 fake IP) should be forwarded to real SC2 IP
+* everything forwarded back to real SC2 IP should be faked to be sent by 192.168.42.1 (fake PISCO)
+
+```bash
+# set variables to be used
 DISCO_VPN_IPADDR="10.0.0.2"
 RPI_VPN_IPADDR="10.0.0.3"
 SC2_IPADDR="192.168.42.50"
 
-# NB! Enable ip forwarding!!!
+# NB! Enable ip forwarding on RPi!!!
 sed -i.bak 's/#net.ipv4.ip_forward/net.ipv4.ip_forward/g' /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
 
-# clear ALL existing iptables rules 
+# verify that kernel IP forwarding has been enabled!
+cat /proc/sys/net/ipv4/ip_forward
+> example output
+1
+
+# clear ALL existing iptables rules (just to be safe that nothing interfares)
 iptables -F
 iptables -F -t nat
 
 # initialize firewall rules
+# shell variables required:
+# DISCO_VPN_IPADDR
+# RPI_VPN_IPADDR
+# SC2_IPADDR
+
 iptables -P FORWARD ACCEPT
 iptables -t nat -A PREROUTING -d 192.168.42.1 -j DNAT --to-destination $DISCO_VPN_IPADDR
-iptables -t nat -A POSTROUTING -d $RPI_VPN_IPADDR -j SNAT --to-source $RPI_VPN_IPADDR
+iptables -t nat -A POSTROUTING -d $DISCO_VPN_IPADDR -j SNAT --to-source $RPI_VPN_IPADDR
 iptables -t nat -A PREROUTING -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
 iptables -t nat -A POSTROUTING -d $SC2_IPADDR -j SNAT --to-source 192.168.42.1
+
+# verify rules and policies
 iptables -L -n
 iptables -L -n -t nat
 
-# make rules persistent
+# make iptables rules persistent on reboot
 apt-get install iptables-persistent
+```
 
-### configure mode switching for 4G USB dongle
+### Configure USB 4G dongle for RPi
 
-# NB! The following vendor/product IDs are specific to Huawei 3372h-153 dongle
-# You may need to alter these according to your model
+Huawei 4G dongles usually have 3 modes they appear in linux: storage, router or serial modem. By default they appear as USB mass storage devices and we need them to be switched into router mode. For achieving that we are using usb_modeswitch utility.
 
-# unpack hw profiles
+Quoting from http://www.draisberghof.de/usb_modeswitch/ website:
+
+> USB_ModeSwitch is (surprise!) a mode switching tool for controlling 'multi-mode' USB devices.
+> More and more USB devices (especially high-speed WAN stuff, based on cell phone chipsets which are able to change their USB connection mode) have their MS Windows drivers onboard; when plugged in for the first time they act like a flash storage and start installing the driver from there. After installation (and on every consecutive plugging) the driver switches the mode internally, the storage device vanishes (in most cases), and a new device (like an USB modem) shows up. Modem maker "Option" calls that feature "ZeroCD (TM)" since it eliminates the need for shipping a separate driver carrier.
+
+```bash
+# insert 4G USB dongle to RPi and lookup its USB IDs
+# it normally appears as USB storage device (if usb_modeswitch is not yet active)
+lsusb
+> example output
+Bus 001 Device 005: ID 12d1:1f01 Huawei Technologies Co., Ltd. E353/E3131 (Mass storage mode)
+
+# alternatively you can see usb device events from dmesg
+dmesg | grep usb
+> example output
+[ 1481.411087] usb 1-1.3: new high-speed USB device number 5 using dwc_otg
+[ 1481.542988] usb 1-1.3: New USB device found, idVendor=12d1, idProduct=1f01
+[ 1481.543005] usb 1-1.3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[ 1481.543012] usb 1-1.3: Product: HUAWEI_MOBILE
+[ 1481.543019] usb 1-1.3: Manufacturer: HUAWEI_MOBILE
+[ 1481.543026] usb 1-1.3: SerialNumber: XXXXXXXXXXXXXXXXX
+[ 1481.544587] usb-storage 1-1.3:1.0: USB Mass Storage device detected
+
+# NB! The following vendor/product IDs are specific to Huawei 3372h-153 dongle in storage mode
+# You may need to alter these according to your model/revision/mode
+VENDOR_ID="12d1"
+PRODUCT_ID="1f01"
+
+# install usb_modeswitch for initializing 4G dongle
+apt-get install usb-modeswitch
+
+# normally usb_modeswitch comes with pre-made library of known product switching profiles
+# which contain target product IDs and other switch options required
+# they come from usb-modeswitch-data package pulled by usb-modeswitch package
+
+# some files that usb-modeswitch-data installs
+dpkg -L usb-modeswitch-data
+> example output
+...
+/lib/udev/rules.d/40-usb_modeswitch.rules
+/usr/share/usb_modeswitch/configPack.tar.gz
+...
+
+# 40-usb_modeswitch.rules lists vendor/product IDs of products known to usb_modeswitch
+# and udev triggers usb_modeswitch_dispatcher wrapper script when known product appears on usb bus
+# which in turn tries to find product switching profile and exec usb_modeswitch with correct arguments
+
+# you actually have to unpack known products switching profiles
 cd /usr/share/usb_modeswitch/
 tar xvzf configPack.tar.gz
 
-# disable auto-modeswitching by usb_modeswitch wrapper 
-# which did not work for me correctly
-sed -i.bak 's/^DisableSwitching=0/DisableSwitching=1/' /etc/usb_modeswitch.conf
+# lookup and review your product switching profile
+less /usr/share/usb_modeswitch/${VENDOR_ID}\:${PRODUCT_ID}
+> example output
+# Huawei E353 (3.se) and others
+TargetVendor=0x12d1
+TargetProductList="14db,14dc"
+HuaweiNewMode=1
+# 14dc is the 4G dongle in router mode that we are after
 
-# enable logging for debugging
+# IF usb_modeswitch pre-made profile is not found or it produces unexpected results
+# THEN you can set DefaultVendor, DefaultProduct, TargetVendor, TargetProductList, etc options in /etc/usb_modeswitch.conf 
+# for example:
+# DefaultVendor=0x12d1
+# DefaultProduct=0x1f01
+# TargetProductList="14dc"
+# HuaweiNewMode=1 
+
+# enable usb_modeswitch logging for debugging
 sed -i.bak 's/^EnableLogging=0/EnableLogging=1/' /etc/usb_modeswitch.conf
 
-# test dongle modeswitching manually (switching from storage to router mode)
-usb_modeswitch -J -v 0x12d1 -p 0x157d
-
-# automate and make persistent (hot-pluggable)
-cat << 'EOF' > /etc/udev/rules.d/70-hawei-e3372h-153.rules
-ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="157d", RUN+="/usr/sbin/usb_modeswitch -J -v 0x12d1 -p 0x157d"
-EOF
+# test modeswitching by connecting your 4G dongle and observing dmesg/lsusb/journalctl -f output
+# 4G dongle in router mode should configure and bring up eth1
+# with default route to 4G internet connection - with higher metric value usually
+# - which means that if you have any other default routes they might still take priority
 ```
