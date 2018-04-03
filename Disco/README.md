@@ -1,6 +1,10 @@
 # About Disco/CHUCK firmware mod for LTE/4G
 
-TODO
+Disco drone has autopilot called C.H.U.C.K. It runs linux on ARM hardware. In order it to have a 4G network connection USB 4G dongle has to be connected to CHUCK micro-usb port and CHUCK firmware needs to be modded for dongle hotplugging and for P2P VPN tunneling with SC2/FFP. 
+
+More details about Disco/CHUCK:
+* http://ardupilot.org/plane/docs/common-CHUCK-overview.html
+* https://github.com/nicknack70/bebop/tree/master/UBHG (althou written for Bebop 2, most of it also applies to Disco)
 
 ## Installation
 
