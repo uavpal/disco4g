@@ -31,6 +31,9 @@ NODE_VPN_IPADDR="10.0.0.2"
 # change to mod directory tree
 cd /data/ftp/internal_000/lte
 
+# make binaries executable
+chmod +x bin/*
+
 # create tinc config directories
 mkdir -p etc/tinc/hosts
 
@@ -53,11 +56,11 @@ ifconfig $INTERFACE down
 EOF
 
 # make vpn up|down scripts executable
-chmod -v +x etc/tinc/tinc-{up,down}
+chmod +x etc/tinc/tinc-*
 
 # generate host keys
 # accept default file locations
-/data/ftp/internal_000/lte/bin/tinc -c /data/ftp/internal_000/lte/etc/tinc generate-keys
+bin/tinc -c etc/tinc generate-keys
 
 # setup host vpn ipaddr
 sed -i '1 s/^/Subnet = '$NODE_VPN_IPADDR'\/32\n\n/' etc/tinc/hosts/disco
