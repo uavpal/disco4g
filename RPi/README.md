@@ -301,6 +301,7 @@ iptables -L -n -t nat
 
 # make iptables rules persistent on reboot
 apt-get install iptables-persistent
+iptables-save > /etc/iptables/rules.v4
 ```
 
 ### Configure USB 4G dongle for RPi
