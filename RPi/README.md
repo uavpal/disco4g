@@ -84,34 +84,48 @@ logger_syslog=-1
 logger_syslog_level=1
 EOF
 
+# lookup your SC2 macaddr
+# method 1: telnet 192.168.42.1 (while connected to Disco AP) and run ulogcat while powering on SC2
+# you should see Controller IP & Mac address lines appearing in log output
+# method 2: plug USB ethernet device to SC2 and cable with LAN router
+# use adb to connect and ifconfig to list SC2 wlan interface mac addr
+
+# set SC2 WIFI mac address
+SC2_MACADDR="a0:14:3d:ce:c2:4f"
+
+# set static IPADDR to be assigned to SC2
+SC2_IPADDR="192.168.42.50"
+
 # create wifi interface configuration file
 # shell variables required:
 # IFACE
 
 cat << EOF > /etc/network/interfaces.d/${IFACE}
 allow-hotplug $IFACE
-auto $IFACE $IFACE:1
+auto $IFACE
 iface $IFACE inet static
 hostapd /etc/hostapd/hostapd.conf
 address 192.168.42.200
 netmask 255.255.255.0
- 
-iface $IFACE:1 inet static
-address 192.168.42.1
-netmask 255.255.255.0
+post-up /usr/local/bin/$IFACE-routes
 EOF
 
-# lookup your SC2 macaddr 
-# method 1: telnet 192.168.42.1 (while connected to Disco AP) and run ulogcat while powering on SC2
-# you should see Controller IP & Mac address lines appearing in log output
-# method 2: plug USB ethernet device to SC2 and cable with LAN router
-# use adb to connect and ifconfig to list SC2 wlan interface mac addr
+# create wifi interface route file (for enabling backroute to SC2_IPADDR)
+# shell variables required:
+# IFACE
+# SC2_IPADDR
 
-# set SC2 WIFI mac address 
-SC2_MACADDR="a0:14:3d:ce:c2:4f"
+cat << EOF > /usr/local/bin/$IFACE-routes
+#!/bin/sh
+echo 1 > /proc/sys/net/ipv4/conf/$IFACE/proxy_arp
+ip route add $SC2_IPADDR dev $IFACE
+EOF
 
-# set static IPADDR to be assigned to SC2
-SC2_IPADDR="192.168.42.50"
+# make route script executable
+chmod +x /usr/local/bin/$IFACE-routes
+
+# bring wlanX up and start hostapd
+ifup $IFACE
 
 # create dnsmasq dhcp server configuration for PISCO AP
 # shell variables required:
@@ -198,7 +212,10 @@ systemctl restart avahi-daemon
 apt-get install tinc
 
 # set local node vpn tunnel address
-NODE_VPN_IPADDR="10.0.0.3"
+NODE_VPN_IPADDR="192.168.42.13"
+
+# set cloud and disco vpn peers IP addresses
+PEER_VPN_NODES="192.168.42.11 192.168.42.12"
 
 mkdir -p /etc/tinc/vpn0/hosts/
 
@@ -216,7 +233,13 @@ EOF
 
 cat << EOF > /etc/tinc/vpn0/tinc-up
 ifconfig \$INTERFACE $NODE_VPN_IPADDR netmask 255.255.255.0
+ip route add 192.168.42.0/24 dev tun0 proto kernel scope link src $NODE_VPN_IPADDR metric 200
+ip route del 192.168.42.0/24 dev tun0 proto kernel scope link src $NODE_VPN_IPADDR
+ip route add 192.168.42.1 dev tun0
 EOF
+
+# add peer routes
+for PEER in $PEER_VPN_NODES; do echo "route add $PEER dev $INTERFACE" >> etc/tinc/tinc-up; done
 
 # create vpn down script
 cat << 'EOF' > /etc/tinc/vpn0/tinc-down
@@ -250,7 +273,6 @@ systemctl start tinc@vpn0.service
 systemctl status tinc
 
 # enable on boot
-systemctl enable tinc
 systemctl enable tinc@vpn0.service
 ```
 
@@ -259,15 +281,15 @@ systemctl enable tinc@vpn0.service
 We are using packet mangling DNAT/SNAT rules to direct SC2->PISCO connections to real Disco over 4G tunneling.
 
 Theory of operation:
-* everything sent to 192.168.42.1 (fake PISCO) should be forwarded to DISCO_VPN_IPADDR (ie to real Disco over LTE)
-* everything forwarded to DISCO_VPN_IPADDR should be faked to be sent by RPI_VPN_IPADDR (SC2 fake IP, as seen by real Disco over LTE)
-* everything sent back to RPI_VPN_IPADDR (SC2 fake IP) should be forwarded to real SC2 IP
-* everything forwarded back to real SC2 IP should be faked to be sent by 192.168.42.1 (fake PISCO)
+* there is routed access to 192.168.42.1 (real DISCO over tinc/LTE)
+* everything sent to DISCO (ie 192.168.42.1) should be faked to be sent by RPI_VPN_IPADDR (SC2 fake IP, as seen by real Disco over LTE)
+* everything sent back to RPI_VPN_IPADDR (ie to SC2 fake IP) should be forwarded to real SC2 IP
+* everything forwarded back to real SC2 IP should be faked to be sent by 192.168.42.1 (real DISCO)
 
 ```bash
 # set variables to be used
-DISCO_VPN_IPADDR="10.0.0.2"
-RPI_VPN_IPADDR="10.0.0.3"
+DISCO_VPN_IPADDR="192.168.42.12"
+RPI_VPN_IPADDR="192.168.42.13"
 SC2_IPADDR="192.168.42.50"
 
 # NB! Enable ip forwarding on RPi!!!
@@ -290,8 +312,7 @@ iptables -F -t nat
 # SC2_IPADDR
 
 iptables -P FORWARD ACCEPT
-iptables -t nat -A PREROUTING -d 192.168.42.1 -j DNAT --to-destination $DISCO_VPN_IPADDR
-iptables -t nat -A POSTROUTING -d $DISCO_VPN_IPADDR -j SNAT --to-source $RPI_VPN_IPADDR
+iptables -t nat -A POSTROUTING -d 192.168.42.1 -j SNAT --to-source $RPI_VPN_IPADDR
 iptables -t nat -A PREROUTING -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
 iptables -t nat -A POSTROUTING -d $SC2_IPADDR -j SNAT --to-source 192.168.42.1
 

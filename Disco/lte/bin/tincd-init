@@ -12,9 +12,9 @@ if [ -z "$TINCD_PID" ]; then
 	# tincd is not running -> lets start tincd
 	echo "INFO: Starting tincd loop..."
 	if [ -z "$DEBUG" ]; then
-		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid; done" &
+		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid; sleep 2; done" &
 	else
-		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid --debug=4; done"
+		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid --debug=4; sleep2; done"
 	fi
 else
 	# tincd is already running -> do nothing

@@ -25,8 +25,12 @@ mount -o remount,ro /
 
 ### setup tinc vpn
 
-# set local node vpn tunnel address
-NODE_VPN_IPADDR="10.0.0.2"
+# set local node vpn tunnel address and network
+NODE_VPN_IPADDR="192.168.42.12"
+NODE_VPN_NET="192.168.42.0/24"
+
+# set cloud and rpi vpn peers IP addresses
+PEER_VPN_NODES="192.168.42.11 192.168.42.13"
 
 # change to mod directory tree
 cd /data/ftp/internal_000/lte
@@ -48,7 +52,12 @@ EOF
 # create vpn up script
 cat << EOF > etc/tinc/tinc-up
 ifconfig \$INTERFACE $NODE_VPN_IPADDR netmask 255.255.255.0
+echo 1 >/proc/sys/net/ipv4/conf/eth0/proxy_arp
+echo 1 >/proc/sys/net/ipv4/conf/$INTERFACE/proxy_arp
 EOF
+
+# add peer routes
+for PEER in $PEER_VPN_NODES; do echo "route add $PEER dev $INTERFACE" >> etc/tinc/tinc-up; done
 
 # create vpn down script
 cat << 'EOF' > etc/tinc/tinc-down
@@ -63,7 +72,7 @@ chmod +x etc/tinc/tinc-*
 bin/tinc -c etc/tinc generate-keys
 
 # setup host vpn ipaddr
-sed -i '1 s/^/Subnet = '$NODE_VPN_IPADDR'\/32\n\n/' etc/tinc/hosts/disco
+sed -i '1 s/^/Subnet = '$NODE_VPN_NET'\n\n/' etc/tinc/hosts/disco
 
 # NB! Exchange node keys through ftp!
 # echo node hosts/ should contain public keys for: cloud rpi disco

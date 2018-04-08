@@ -19,7 +19,7 @@ It provides some useful features we rely on:
 apt-get install tinc
 
 # set local node vpn tunnel address
-NODE_VPN_IPADDR="10.0.0.1"
+NODE_VPN_IPADDR="192.168.42.11"
 # lookup your server public IP 
 NODE_PUB_IPADDR="XXX.XXX.XXX.XXX"
 
@@ -64,7 +64,6 @@ systemctl start tinc@vpn0.service
 systemctl status tinc
 
 # enable on boot
-systemctl enable tinc
 systemctl enable tinc@vpn0.service
 
 # NB! You may need to set also firewall rules, depending on your server provider and VM OS configuration
