@@ -84,6 +84,21 @@ logger_syslog=-1
 logger_syslog_level=1
 EOF
 
+# set hostapd.conf system variable for correctness
+# but we actually are not going to use hostapd init script
+# as we start hostapd when hotplugging wlan0 interface
+sed -i -- 's/^#DAEMON_CONF=""/DAEMON_CONF="\/etc\/hostapd\/hostapd.conf"/g' /etc/default/hostapd 
+systemctl stop hostapd
+systemctl disable hostapd
+
+# deny dhcpc wlan interface management
+# as otherwise it causes problems with starting hostapd
+# shell variables required:
+# IFACE
+
+echo "denyinterfaces $IFACE" >> /etc/dhcpcd.conf
+systemctl restart dhcpcd 
+
 # lookup your SC2 macaddr
 # method 1: telnet 192.168.42.1 (while connected to Disco AP) and run ulogcat while powering on SC2
 # you should see Controller IP & Mac address lines appearing in log output
@@ -104,10 +119,10 @@ cat << EOF > /etc/network/interfaces.d/${IFACE}
 allow-hotplug $IFACE
 auto $IFACE
 iface $IFACE inet static
-hostapd /etc/hostapd/hostapd.conf
 address 192.168.42.200
 netmask 255.255.255.0
 post-up /usr/local/bin/$IFACE-routes
+hostapd /etc/hostapd/hostapd.conf
 EOF
 
 # create wifi interface route file (for enabling backroute to SC2_IPADDR)
@@ -124,7 +139,7 @@ EOF
 # make route script executable
 chmod +x /usr/local/bin/$IFACE-routes
 
-# bring wlanX up and start hostapd
+# bring wlanX (and hostapd) up
 ifup $IFACE
 
 # create dnsmasq dhcp server configuration for PISCO AP
