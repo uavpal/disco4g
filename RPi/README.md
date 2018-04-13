@@ -482,3 +482,32 @@ screen -t "hilink-status" bash -c "watch -c -t /usr/local/bin/hilink-status"
 # --- hilink-status mod end ---
 EOF
 ```
+
+### speedtest.net cli utility
+
+Useful for testing 4G link speed.
+
+Installation:
+```bash
+cd /usr/local/bin
+curl -o speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+chmod +x speedtest-cli
+```
+
+Usage:
+```bash
+# IF you are on RPi ethernet connection and it sets default route
+# you need to kill RPi dhcp client daemon and remove default route via LAN gw
+ip route
+
+# set your LAN gw (to be removed)
+LAN_GW="192.168.1.254"
+
+# kill dhcp client daemon - so that route can be removed
+kill -s SIGTERM $( pidof dhcpcd )
+# remove default route
+ip route del default via $LAN_GW
+
+# run speedtest
+speedtest-cli
+```
