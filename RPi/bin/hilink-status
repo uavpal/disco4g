@@ -5,6 +5,11 @@ LOCAL_IP="192.168.8.100"
 CLOUD_IP="192.168.42.11"
 DISCO_IP="192.168.42.1"
 
+COLOR_OK="\033[32m"
+COLOR_WARN="\033[33"
+COLOR_ERR="\033[31"
+COLOR_RESET="\e[0m"
+
 if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 
 	curl -s -X GET "http://$MODEM_IP/api/webserver/SesTokInfo" > /tmp/ses_tok.xml
@@ -53,10 +58,6 @@ if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 	UPLOAD_MB=$(echo "scale=1; x=$UPLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
 	DLLOAD_MB=$(echo "scale=1; x=$DLLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
 
-	COLOR_OK="\033[32m"
-	COLOR_WARN="\033[33"
-	COLOR_ERR="\033[31"
-
 	if [ -f /tmp/pingmon-$CLOUD_IP ]; then
 		CLOUD_LATENCY=$( cat /tmp/pingmon-$CLOUD_IP | tail -1 | cut -s -d '/' -f 5 | cut -d '.' -f 1 )
 		if [ -z $CLOUD_LATENCY ]; then
@@ -78,6 +79,12 @@ if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 	fi
 
 	GATEWAY=$( ip route | sort -k 9 | awk '/default via/ { print $3 }' | head -1 )
+	HOSTAPD_PID=$( pidof hostapd )
+	if [ -n "$HOSTAPD_PID" ]; then
+		HOSTAPD_STATUS="running ($HOSTAPD_PID)"
+	else
+		HOSTAPD_STATUS="not running"
+	fi
 
 	echo
 	echo "   status:\t$CONN_STATUS_MAPPED ($CONN_MODE)"
@@ -89,6 +96,7 @@ if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 	echo "   sent/recv:\t$UPLOAD_MB/$DLLOAD_MB MB"
 	echo "   cloud lag:\t$CLOUD_LATENCY"
 	echo "   disco lag:\t$DISCO_LATENCY"
+	echo "   hotspot:\t$HOSTAPD_STATUS"
 
 else
 
