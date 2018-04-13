@@ -84,6 +84,21 @@ logger_syslog=-1
 logger_syslog_level=1
 EOF
 
+# set hostapd.conf system variable for correctness
+# but we actually are not going to use hostapd init script
+# as we start hostapd when hotplugging wlan0 interface
+sed -i -- 's/^#DAEMON_CONF=""/DAEMON_CONF="\/etc\/hostapd\/hostapd.conf"/g' /etc/default/hostapd 
+systemctl stop hostapd
+systemctl disable hostapd
+
+# deny dhcpc wlan interface management
+# as otherwise it causes problems with starting hostapd
+# shell variables required:
+# IFACE
+
+echo "denyinterfaces $IFACE" >> /etc/dhcpcd.conf
+systemctl restart dhcpcd 
+
 # lookup your SC2 macaddr
 # method 1: telnet 192.168.42.1 (while connected to Disco AP) and run ulogcat while powering on SC2
 # you should see Controller IP & Mac address lines appearing in log output
@@ -104,10 +119,10 @@ cat << EOF > /etc/network/interfaces.d/${IFACE}
 allow-hotplug $IFACE
 auto $IFACE
 iface $IFACE inet static
-hostapd /etc/hostapd/hostapd.conf
 address 192.168.42.200
 netmask 255.255.255.0
 post-up /usr/local/bin/$IFACE-routes
+hostapd /etc/hostapd/hostapd.conf
 EOF
 
 # create wifi interface route file (for enabling backroute to SC2_IPADDR)
@@ -124,7 +139,7 @@ EOF
 # make route script executable
 chmod +x /usr/local/bin/$IFACE-routes
 
-# bring wlanX up and start hostapd
+# bring wlanX (and hostapd) up
 ifup $IFACE
 
 # create dnsmasq dhcp server configuration for PISCO AP
@@ -283,8 +298,7 @@ We are using packet mangling DNAT/SNAT rules to direct SC2->PISCO connections to
 Theory of operation:
 * there is routed access to 192.168.42.1 (real DISCO over tinc/LTE)
 * everything sent to DISCO (ie 192.168.42.1) should be faked to be sent by RPI_VPN_IPADDR (SC2 fake IP, as seen by real Disco over LTE)
-* everything sent back to RPI_VPN_IPADDR (ie to SC2 fake IP) should be forwarded to real SC2 IP
-* everything forwarded back to real SC2 IP should be faked to be sent by 192.168.42.1 (real DISCO)
+* everything sent back to RPI_VPN_IPADDR from Disco (ie to SC2 fake IP) should be forwarded to real SC2 IP
 
 ```bash
 # set variables to be used
@@ -313,8 +327,8 @@ iptables -F -t nat
 
 iptables -P FORWARD ACCEPT
 iptables -t nat -A POSTROUTING -d 192.168.42.1 -j SNAT --to-source $RPI_VPN_IPADDR
-iptables -t nat -A PREROUTING -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
-iptables -t nat -A POSTROUTING -d $SC2_IPADDR -j SNAT --to-source 192.168.42.1
+iptables -t nat -A PREROUTING -s 192.168.42.1 -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
+iptables -t nat -A PREROUTING -s $DISCO_VPN_IPADDR -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
 
 # verify rules and policies
 iptables -L -n

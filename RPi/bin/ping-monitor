@@ -1,0 +1,10 @@
+#!/bin/sh
+IPADDR="$1"
+AVG="3"
+
+while true; do
+    echo "$( date -u ) $( ping -c $AVG $IPADDR | tail -1 )" >> /tmp/pingmon-$IPADDR
+    sleep 3
+done
+
+exit 0
