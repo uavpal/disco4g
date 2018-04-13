@@ -80,7 +80,7 @@ if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 	fi
 
 	if [ -f /tmp/pingmon-$SC2_IP ]; then
-		DISCO_LATENCY=$( cat /tmp/pingmon-$SC2_IP | tail -1 | cut -s -d '/' -f 5 | cut -d '.' -f 1 )
+		SC2_LATENCY=$( cat /tmp/pingmon-$SC2_IP | tail -1 | cut -s -d '/' -f 5 | cut -d '.' -f 1 )
 		if [ -z $SC2_LATENCY ]; then
 			SC2_LATENCY="N/A"
 		fi
