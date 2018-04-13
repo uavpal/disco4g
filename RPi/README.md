@@ -428,8 +428,9 @@ Huawei e3372 4G USB dongles have API interface where connection status informati
 Hardware components used:
 * https://www.waveshare.com/product/modules/oleds-lcds/raspberry-pi-lcd/3.5inch-rpi-lcd-a.htm
 
-Installation:
+![hilink_status_dashboard](../images/hilink-status-dashboard.png)
 
+Installation:
 ```bash
 # install 3.5" LCD driver
 apt-get install git
