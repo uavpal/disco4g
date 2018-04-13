@@ -298,8 +298,7 @@ We are using packet mangling DNAT/SNAT rules to direct SC2->PISCO connections to
 Theory of operation:
 * there is routed access to 192.168.42.1 (real DISCO over tinc/LTE)
 * everything sent to DISCO (ie 192.168.42.1) should be faked to be sent by RPI_VPN_IPADDR (SC2 fake IP, as seen by real Disco over LTE)
-* everything sent back to RPI_VPN_IPADDR (ie to SC2 fake IP) should be forwarded to real SC2 IP
-* everything forwarded back to real SC2 IP should be faked to be sent by 192.168.42.1 (real DISCO)
+* everything sent back to RPI_VPN_IPADDR from Disco (ie to SC2 fake IP) should be forwarded to real SC2 IP
 
 ```bash
 # set variables to be used
@@ -328,8 +327,8 @@ iptables -F -t nat
 
 iptables -P FORWARD ACCEPT
 iptables -t nat -A POSTROUTING -d 192.168.42.1 -j SNAT --to-source $RPI_VPN_IPADDR
-iptables -t nat -A PREROUTING -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
-iptables -t nat -A POSTROUTING -d $SC2_IPADDR -j SNAT --to-source 192.168.42.1
+iptables -t nat -A PREROUTING -s 192.168.42.1 -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
+iptables -t nat -A PREROUTING -s $DISCO_VPN_IPADDR -d $RPI_VPN_IPADDR -j DNAT --to-destination $SC2_IPADDR
 
 # verify rules and policies
 iptables -L -n
