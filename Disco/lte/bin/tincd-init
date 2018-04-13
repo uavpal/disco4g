@@ -1,0 +1,28 @@
+#!/bin/sh
+
+MODEXIST="$( lsmod | grep "tun " )"
+if [ -z "$MODEXIST" ]; then
+	echo "INFO: Loading tun kernel module..."
+        insmod /data/ftp/internal_000/lte/modules/tun.ko
+fi
+
+# check if tincd is already running
+TINCD_PID="$( pidof tincd )"
+if [ -z "$TINCD_PID" ]; then
+	# tincd is not running -> lets start tincd
+	echo "INFO: Starting tincd loop..."
+	if [ -z "$DEBUG" ]; then
+		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid; sleep 2; done" &
+	else
+		exec sh -c "while true; do /data/ftp/internal_000/lte/bin/tincd -c /data/ftp/internal_000/lte/etc/tinc -D --pidfile=/var/run/tincd.pid --debug=4; sleep2; done"
+	fi
+else
+	# tincd is already running -> do nothing
+	TINCD_INIT_PID="$( cat /proc/$TINCD_PID/status | awk '/PPid:/ { print $2 }' )"
+	echo "INFO: tincd-init loop is already running as pid: $TINCD_INIT_PID"
+	echo "INFO: tincd daemon is already running as pid: $TINCD_PID"
+	echo "INFO: for reloading tincd daemon please run: kill -SIGHUP $TINCD_PID"
+	echo "INFO: for stopping tincd please run: kill -SIGTERM $TINCD_INIT_PID && kill -SIGTERM $TINCD_PID" 
+fi
+echo "INFO: All done."
+exit 0
