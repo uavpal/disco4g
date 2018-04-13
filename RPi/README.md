@@ -419,3 +419,66 @@ sed -i.bak 's/^EnableLogging=0/EnableLogging=1/' /etc/usb_modeswitch.conf
 # with default route to 4G internet connection - with higher metric value usually
 # - which means that if you have any other default routes they might still take priority
 ```
+
+## Optional
+### HiLINK status dashboard
+
+Huawei e3372 4G USB dongles have API interface where connection status information can be fetched. hilink-status script does provide some insights into connection details and can monitor link and participating endpoints with the help of ping-monitor instances. If RPi has LCD screen then hilink-status could be run on bootup as permanent status dashboard.
+
+Hardware components used:
+* https://www.waveshare.com/product/modules/oleds-lcds/raspberry-pi-lcd/3.5inch-rpi-lcd-a.htm
+
+Installation:
+
+```bash
+# install 3.5" LCD driver
+apt-get install git
+git clone https://github.com/goodtft/LCD-show.git
+cd LCD-show
+chmod +x LCD35-show
+sudo ./LCD35-show
+
+# enable console auto-login for pi user
+su - pi
+sudo raspi-config
+* Choose option 3: Boot Options
+* Choose option B1: Desktop / CLI
+* Choose option B2: Console Autologin
+* Select Finish, and reboot the pi.
+
+# prepare for scripts
+apt-get install libxml2-utils
+cd /usr/local/bin/
+
+# install hilink-status script
+curl -L -O https://raw.githubusercontent.com/mainframe/disco4g/master/RPi/bin/hilink-status
+chmod +x hilink-status
+# NB! Review and modify IP addreses used in hilink-status script
+# - if using different IPs in your setup
+
+# install ping-monitor helper script
+curl -L -O https://raw.githubusercontent.com/mainframe/disco4g/master/RPi/bin/ping-monitor
+chmod +x ping-monitor
+
+# trigger ping-monitors and hilink-status dashboard from pi user .bashrc
+su - pi
+cat << 'EOF' >> ~/.bashrc
+# --- hilink-status mod start ---
+# disable console screen blanking
+setterm -blank 0
+# suppress system warning/error messages
+sudo dmesg -n 1
+# launch ping-monitors
+# cloud VPN host
+/usr/local/bin/ping-monitor 192.168.42.11 &
+# disco
+/usr/local/bin/ping-monitor 192.168.42.1 &
+# SC2
+/usr/local/bin/ping-monitor 192.168.42.50 &
+# set larger font
+setfont /usr/share/consolefonts/Uni3-TerminusBold24x12.psf.gz
+# run hilink status inside screen
+screen -t "hilink-status" bash -c "watch -c -t /usr/local/bin/hilink-status"
+# --- hilink-status mod end ---
+EOF
+```
