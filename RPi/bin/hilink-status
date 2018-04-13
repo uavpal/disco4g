@@ -1,60 +1,100 @@
 #!/bin/sh
 
 MODEM_IP="192.168.8.1"
+LOCAL_IP="192.168.8.100"
+CLOUD_IP="192.168.42.11"
+DISCO_IP="192.168.42.1"
 
-curl -s -X GET "http://$MODEM_IP/api/webserver/SesTokInfo" > /tmp/ses_tok.xml
-COOKIE=`grep "SessionID=" /tmp/ses_tok.xml | cut -b 10-147`
-TOKEN=`grep "TokInfo" /tmp/ses_tok.xml | cut -b 10-41`
+if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 
-curl -s -X GET "http://$MODEM_IP/api/monitoring/status" \
--H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
--H "Content-Type: text/xml" > /tmp/modem_status.xml
+	curl -s -X GET "http://$MODEM_IP/api/webserver/SesTokInfo" > /tmp/ses_tok.xml
+	COOKIE=`grep "SessionID=" /tmp/ses_tok.xml | cut -b 10-147`
+	TOKEN=`grep "TokInfo" /tmp/ses_tok.xml | cut -b 10-41`
 
-CONN_STATUS=$( xmllint --xpath "string(//ConnectionStatus)" /tmp/modem_status.xml )
-SIGNAL_CURRENT=$( xmllint --xpath "string(//SignalIcon)" /tmp/modem_status.xml )
-SIGNAL_MAX=$( xmllint --xpath "string(//maxsignal)" /tmp/modem_status.xml )
+	curl -s -X GET "http://$MODEM_IP/api/monitoring/status" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" > /tmp/modem_status.xml
 
-curl -s -X GET "http://$MODEM_IP/api/device/information" \
--H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
--H "Content-Type: text/xml" > /tmp/modem_info.xml
+	CONN_STATUS=$( xmllint --xpath "string(//ConnectionStatus)" /tmp/modem_status.xml )
+	SIGNAL_CURRENT=$( xmllint --xpath "string(//SignalIcon)" /tmp/modem_status.xml )
+	SIGNAL_MAX=$( xmllint --xpath "string(//maxsignal)" /tmp/modem_status.xml )
 
-CONN_MODE=$( xmllint --xpath "string(//workmode)" /tmp/modem_info.xml )
+	curl -s -X GET "http://$MODEM_IP/api/device/information" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" > /tmp/modem_info.xml
 
-curl -s -X GET "http://$MODEM_IP/api/monitoring/traffic-statistics" \
--H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
--H "Content-Type: text/xml" > /tmp/modem_usage.xml
+	CONN_MODE=$( xmllint --xpath "string(//workmode)" /tmp/modem_info.xml )
+	WAN_ADDR=$( xmllint --xpath "string(//WanIPAddress)" /tmp/modem_info.xml )
 
-UPTIME=$( xmllint --xpath "string(//CurrentConnectTime)" /tmp/modem_usage.xml )
-UPLOAD=$( xmllint --xpath "string(//CurrentUpload)" /tmp/modem_usage.xml )
-DLLOAD=$( xmllint --xpath "string(//CurrentDownload)" /tmp/modem_usage.xml )
-ULRATE=$( xmllint --xpath "string(//CurrentUploadRate)" /tmp/modem_usage.xml )
-DLRATE=$( xmllint --xpath "string(//CurrentDownloadRate)" /tmp/modem_usage.xml )
+	curl -s -X GET "http://$MODEM_IP/api/monitoring/traffic-statistics" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" > /tmp/modem_usage.xml
 
-case $CONN_STATUS in
-	900 )
-		CONN_STATUS_MAPPED="Connecting..." ;;
-	901 )
-		CONN_STATUS_MAPPED="Connected" ;;
-	902 )
-		CONN_STATUS_MAPPED="Disconnected" ;;
-	* )
-		CONN_STATUS_MAPPED="Unknown" ;;
-esac
+	UPTIME=$( xmllint --xpath "string(//CurrentConnectTime)" /tmp/modem_usage.xml )
+	UPLOAD=$( xmllint --xpath "string(//CurrentUpload)" /tmp/modem_usage.xml )
+	DLLOAD=$( xmllint --xpath "string(//CurrentDownload)" /tmp/modem_usage.xml )
+	ULRATE=$( xmllint --xpath "string(//CurrentUploadRate)" /tmp/modem_usage.xml )
+	DLRATE=$( xmllint --xpath "string(//CurrentDownloadRate)" /tmp/modem_usage.xml )
 
-ULRATE_MBIT=$(echo "scale=1; x=$ULRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
-DLRATE_MBIT=$(echo "scale=1; x=$DLRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
+	case $CONN_STATUS in
+		900 )
+			CONN_STATUS_MAPPED="Connecting..." ;;
+		901 )
+			CONN_STATUS_MAPPED="Connected" ;;
+		902 )
+			CONN_STATUS_MAPPED="Disconnected" ;;
+		* )
+			CONN_STATUS_MAPPED="Unknown" ;;
+	esac
 
-UPLOAD_MB=$(echo "scale=1; x=$UPLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
-DLLOAD_MB=$(echo "scale=1; x=$DLLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
+	ULRATE_MBIT=$(echo "scale=1; x=$ULRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
+	DLRATE_MBIT=$(echo "scale=1; x=$DLRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
 
-COLOR_OK="\033[32m"
-COLOR_WARN="\033[33"
-COLOR_ERR="\033[31"
+	UPLOAD_MB=$(echo "scale=1; x=$UPLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
+	DLLOAD_MB=$(echo "scale=1; x=$DLLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
 
-echo "status:\t\t$CONN_STATUS_MAPPED ($CONN_MODE)"
-echo "signal:\t\t$SIGNAL_CURRENT/$SIGNAL_MAX "
-echo "uptime:\t\t$( printf '%dh:%dm:%ds\n' $(($UPTIME/3600)) $(($UPTIME%3600/60)) $(($UPTIME%60)) )"
-echo "link:\t\t$ULRATE_MBIT/$DLRATE_MBIT Mbit"
-echo "usage:\t\t$UPLOAD_MB/$DLLOAD_MB MB"
+	COLOR_OK="\033[32m"
+	COLOR_WARN="\033[33"
+	COLOR_ERR="\033[31"
+
+	if [ -f /tmp/pingmon-$CLOUD_IP ]; then
+		CLOUD_LATENCY=$( cat /tmp/pingmon-$CLOUD_IP | tail -1 | cut -s -d '/' -f 5 | cut -d '.' -f 1 )
+		if [ -z $CLOUD_LATENCY ]; then
+			CLOUD_LATENCY="N/A"
+		fi
+		CLOUD_LATENCY="$CLOUD_LATENCY ms"
+	else 
+		CLOUD_LATENCY="ERR: not monitored"
+	fi
+
+	if [ -f /tmp/pingmon-$DISCO_IP ]; then
+		DISCO_LATENCY=$( cat /tmp/pingmon-$DISCO_IP | tail -1 | cut -s -d '/' -f 5 | cut -d '.' -f 1 )
+		if [ -z $DISCO_LATENCY ]; then
+			DISCO_LATENCY="N/A"
+		fi
+		DISCO_LATENCY="$DISCO_LATENCY ms"
+	else 
+		DISCO_LATENCY="ERR: not monitored"
+	fi
+
+	GATEWAY=$( ip route | sort -k 9 | awk '/default via/ { print $3 }' | head -1 )
+
+	echo
+	echo "   status:\t$CONN_STATUS_MAPPED ($CONN_MODE)"
+	echo "   signal:\t$SIGNAL_CURRENT/$SIGNAL_MAX"
+	echo "   uptime:\t$( printf '%dh:%dm:%ds\n' $(($UPTIME/3600)) $(($UPTIME%3600/60)) $(($UPTIME%60)) )"
+	echo "   wan IP:\t$WAN_ADDR"
+	echo "   gateway:\t$GATEWAY"
+	echo "   bandwidth:\t$ULRATE_MBIT/$DLRATE_MBIT Mbit"
+	echo "   sent/recv:\t$UPLOAD_MB/$DLLOAD_MB MB"
+	echo "   cloud lag:\t$CLOUD_LATENCY"
+	echo "   disco lag:\t$DISCO_LATENCY"
+
+else
+
+	echo
+	echo "   status:\tERR: No HiLINK"
+
+fi
 
 exit 0
