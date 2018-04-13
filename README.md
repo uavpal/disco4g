@@ -58,4 +58,11 @@ TODOs:
 
 ## Usage instructions
 
-TODO
+Pre-flight checks and bootup procedure:
+* Verify that you have sufficient 4G signal strength, acceptable ping latency and data bandwith available in the flying area
+* Verify that sufficient dataplans are available for your 4G SIM cards. 1080p video stream is roughly about 2.4 Mbits per second => 0.3 MB/sec => 18 MB/min => 1.080 GB/h 
+* Verify that RPi has sufficient battery power (ie like 10.000 mAH / 2A 5V powerbank fully charged)
+* Boot up Disco and verify that 4G USB dongle led indicates successful connection to carrier (in case of Huawei e3372h: solid blue or green, not blinking)
+* Boot up RPi with 4G dongle connected and verify that dongle led indicates successful connection to carrier and that PISCO AP is listed when doing WIFI scan
+* Boot up SC2 and connect it to FFP app: discover and connect to PISCO drone
+* Verify that SC2 led turns blue (if SC2 was modded) and that FFP connects to PISCO and video stream starts and is stable (can take up to 30-40 secs)
