@@ -38,7 +38,7 @@ Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply
 
 The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE connection to the Disco is established.
 
-**TODO:** <photo:Skycontroller 2 with blue LED>
+[![Skycontroller 2 with blue LED](https://image.ibb.co/f5Uz97/SC2_small_blue.jpg)](https://www.youtube.com/watch?v=SEz70ClCetM)
 
 Once up in the air, everything works in the same manner as with the stock Wi-Fi connection, e.g. flight plans, return-to-home (auto-initiated in case of connection loss), etc.
 
