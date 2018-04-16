@@ -11,7 +11,7 @@ Pros:
 - Low hardware cost (around US$ 40.-)
 - All stock hardware can be used (standard Parrot Skycontroller 2 with FreeFlight Pro App)
 - Return-to-home (RTH) is auto-initiated in case of connection loss
-- Allows independent real-time GPS tracking via Glympse <add link>
+- Allows independent real-time GPS tracking via [Glympse](https://www.glympse.com/get-glympse-app/)
 - Easy initiation of 4G/LTE connection via Skycontroller 2 button
 - Can be used for manually controlled flights as well as flight plans
 
@@ -24,10 +24,25 @@ Cons:
 - The Parrot Disco's stock Wi-Fi loses video signal way before the specified 2 km.
 - Because we can :)
 
-## How?
+## How does it work?
 ![High-level connection diagram](https://preview.ibb.co/c8qPP7/disco4g_highlevel_diagram_end2end.png)
 
-**TODO**
+In simple terms, the Wi-Fi connection is hijacked and routed via a tethering device (e.g. mobile phone) through a 4G/LTE cellular/mobile network to the Disco. As tethering device, any modern mobile phone can be used (iOS: "Personal Hotspot" or Android: "Portable WLAN hotspot").
+The Disco requires a 4G/LTE USB modem to be able to send and receive data via cellular/mobile networks.
+
+![USB Modem inside Disco's canopy](https://preview.ibb.co/g5rgNS/modem_in_disco.jpg)
+
+Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply pressing the Settings button twice on Skycontroller 2.
+**TODO:** <photo:settings button>
+The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE connection to the Disco is established.
+
+**TODO:** <photo:Skycontroller 2 with blue LED>
+
+Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android allows independent real-time GPS tracking of the Disco via 4G/LTE. This can be particularily useful to recover the Disco in the unfortunate event of a crash or flyaway.
+
+**TODO:** <photo:glympse screenshot>
+
+Note: The mobile device running FreeFlight Pro (the one conneted to Skycontroller 2 via USB) can even be the same as the mobile tethering device/phone.
 
 ## Requirements
 **TODO**
