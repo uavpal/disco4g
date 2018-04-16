@@ -16,7 +16,7 @@ Pros:
 - Can be used for manually controlled flights as well as flight plans
 
 Cons:
-- Dependent on [4G/LTE mobile network coverage](https://en.wikipedia.org/wiki/List_of_countries_by_4G_LTE_penetration), see 
+- Dependent on [4G/LTE mobile network coverage](https://en.wikipedia.org/wiki/List_of_countries_by_4G_LTE_penetration) 
 - Might incur mobile data cost (dependent on your mobile network operator)
 - Slightly higher latency as compared to Wi-Fi
 
