@@ -63,13 +63,18 @@ Please see Wiki article [How to fly on 4G LTE? (User Manual)](https://github.com
 Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ)
 
 ## Is it really free? Are you crazy?
-**TODO**
+Yes and yes! This softmod has been developed during countless days and nights by RC hobbyists and technology enthusiasts without any commercial intention.
+Everyone can download our code for free and transform his/her Disco into a 4G/LTE enabled fixed-wing drone by following the instructions provided.
+However, we highly appreciate [feedback and active contribution](#contact) in improving and maintaining this project.
 
 ## Contact
 Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.
 
 ## Special Thanks to
-**TODO**
+- Parrot - for building this beautiful bird, as well as for promoting and supporting Free and Open-Source Software!
+- zerotier - awesome product and excellent support!
+
+**TODO: ask and add ppl who contributed**
 
 ## Disclaimer
 This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco entirely at YOUR OWN RISK!!!
