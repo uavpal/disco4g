@@ -33,7 +33,9 @@ The Disco requires a 4G/LTE USB modem to be able to send and receive data via ce
 ![USB Modem inside Disco's canopy](https://preview.ibb.co/g5rgNS/modem_in_disco.jpg)
 
 Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply pressing the Settings button twice on Skycontroller 2.
+
 **TODO:** <photo:settings button>
+
 The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE connection to the Disco is established.
 
 **TODO:** <photo:Skycontroller 2 with blue LED>
@@ -60,12 +62,12 @@ Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ)
 **TODO**
 
 ## Contact
-**TODO**
+Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.
 
 ## Special Thanks to
 **TODO**
 
 ## Disclaimer
-This is still an EXPERIMENTAL hack, no thorough testing has been conducted! Mod and fly your Disco entirely at YOUR OWN RISK!!!
+This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco entirely at YOUR OWN RISK!!!
 
 
