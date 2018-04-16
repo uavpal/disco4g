@@ -33,7 +33,7 @@ Cons:
 **TODO**
 
 ## Installation
-Please see Wiki article **TODO**
+Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation)
 
 ## Usage
 Please see Wiki article [How to fly on 4G LTE? (User Manual)](https://github.com/uavpal/disco4g/wiki/How-to-fly-on-4G-LTE%3F-(User-Manual))
