@@ -66,7 +66,7 @@ Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ)
 Yes and yes! This softmod has been developed during countless days and nights by RC hobbyists and technology enthusiasts without any commercial intention.
 Everyone can download our code for free and transform his/her Disco into a 4G/LTE enabled fixed-wing drone by following the instructions provided.
 
-_However_, we highly appreciate [feedback and active contribution](#contact) in improving and maintaining this project.
+_However_, we highly appreciate [feedback and active contribution](#contactcontribute) in improving and maintaining this project.
 
 ![Shut up and take my money!](http://image.ibb.co/cLw9SS/shut_up_and_take_my_money.jpg)
 
