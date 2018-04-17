@@ -51,7 +51,29 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 ![Glympse App showing Disco's location](https://image.ibb.co/kwt4bn/discoglympse.png)
 
 ## Requirements
-**TODO**
+*Hardware:*
+- Parrot Disco drone
+- Parrot Skycontroller 2
+- Huawei E3372 4G USB modem and SIM card\
+Note: there are different Huawei E3372 models available - please read [this FAQ entry](#) before buying to ensure your mobile network operator's LTE bands are supported.
+- Antennas for the modem (optional, but recommended)
+- USB OTG cable (ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended)
+- Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, it's recommended that both SIM cards are from the same operator)
+- PC with Wi-Fi (one-time, required for initial installation)
+
+*Software:*
+- FreeFlight Pro App on tablet/phone (can be the same device providing Wi-Fi tethering)
+- Zerotier account (free)
+- (optional) Glympse App for independent real-time GPS tracking - free Glympse Developer account required
+
+*Tested on:*
+- Mobile tethering device: iPhone X (iOS 11.3)
+- USB-connected device with FreeFlight Pro App: iPad Pro (iOS 11.3), iPhone X (iOS 11.3)
+- Parrot Disco, Firmware 1.4.1
+- Parrot Skycontroller 2, Firmware 1.0.7
+- FreeFlight Pro 5.2.0 on iOS
+
+Please [report](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, we will update this list.
 
 ## Installation
 Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation).
