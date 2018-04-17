@@ -67,6 +67,8 @@ Yes and yes! This softmod has been developed during countless days and nights by
 Everyone can download our code for free and transform his/her Disco into a 4G/LTE enabled fixed-wing drone by following the instructions provided.
 However, we highly appreciate [feedback and active contribution](#contact) in improving and maintaining this project.
 
+[![Donate using Paypal](https://www.paypalobjects.com/en_GB/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=YCEEJQS2NL7DJ&lc=SG&item_name=UAVPAL&button_subtype=services&no_note=0&cn=Add%20special%20instructions%3A&no_shipping=2&currency_code=SGD&bn=PP-BuyNowBF:btn_donateCC_LG.gif:NonHosted)
+
 ## Contact
 Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.
 
