@@ -53,13 +53,14 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 ## Requirements
 **TODO**
 
-## [Installation (Wiki)](https://github.com/uavpal/disco4g/wiki/Installation)
+## Installation
+Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation).
 
-## Usage
-Please see Wiki article [How to fly on 4G LTE? (User Manual)](https://github.com/uavpal/disco4g/wiki/How-to-fly-on-4G-LTE%3F-(User-Manual))
+## How to fly on 4G/LTE? (User Manual)
+Please see Wiki article [How to fly on 4G/LTE? (User Manual)](https://github.com/uavpal/disco4g/wiki/How-to-fly-on-4G-LTE%3F-(User-Manual)).
 
 ## FAQ
-Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ)
+Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ).
 
 ## Is it really free? Are you crazy?
 Yes and yes! This softmod has been developed during countless days and nights by RC hobbyists and technology enthusiasts without any commercial intention.
