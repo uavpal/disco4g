@@ -58,7 +58,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](#) before buying to ensure your mobile network operator's LTE bands are supported.
 - Antennas for the modem (optional, but recommended)
 - USB OTG cable (ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended)
-- Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, it's recommended that both SIM cards are from the same operator)
+- Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, use the same operator as the USB modem's SIM card)
 - PC with Wi-Fi (one-time, required for initial installation)
 
 *Software:*
