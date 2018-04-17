@@ -34,7 +34,7 @@ The Disco requires a 4G/LTE USB modem to be able to send and receive data via ce
 
 Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply pressing the Settings button twice on Skycontroller 2.
 
-**TODO:** <photo:settings button>
+![Settings Button on Skycontroller 2](http://image.ibb.co/iBWcgn/settingsbutton.jpg)
 
 The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE connection to the Disco is established.
 
@@ -55,7 +55,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 - Parrot Disco drone
 - Parrot Skycontroller 2
 - [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and SIM card\
-Note: there are different Huawei E3372 models available - please read [this FAQ entry](#) before buying to ensure your mobile network operator's LTE bands are supported.
+Note: there are different Huawei E3372 models available - please read [this FAQ entry](#) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional, but recommended)
 - USB OTG cable (ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended)
 - Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, use the same operator as the USB modem's SIM card)
