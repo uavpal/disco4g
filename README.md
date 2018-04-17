@@ -76,6 +76,7 @@ Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/
 - Glympse - great app and outstanding API
 - Andres Toomsalu
 - Brian
+- Dreadwing007
 - Josh Mason
 
 **TODO: ask and add ppl who contributed**
