@@ -54,9 +54,9 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 *Hardware:*
 - Parrot Disco drone
 - Parrot Skycontroller 2
-- Huawei E3372 4G USB modem and SIM card\
+- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and SIM card\
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](#) before buying to ensure your mobile network operator's LTE bands are supported.
-- Antennas for the modem (optional, but recommended)
+- Antennas (2x CRC9) for the modem (optional, but recommended)
 - USB OTG cable (ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended)
 - Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, use the same operator as the USB modem's SIM card)
 - PC with Wi-Fi (one-time, required for initial installation)
@@ -64,7 +64,7 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 *Software:*
 - FreeFlight Pro App on tablet/phone (can be the same device providing Wi-Fi tethering)
 - Zerotier account (free)
-- (optional) Glympse App for independent real-time GPS tracking - free Glympse Developer account required
+- Glympse App for independent real-time GPS tracking (optional) - free Glympse Developer account required
 
 *Tested on:*
 - Mobile tethering device: iPhone X (iOS 11.3)
