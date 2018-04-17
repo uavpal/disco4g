@@ -71,8 +71,12 @@ However, we highly appreciate [feedback and active contribution](#contact) in im
 Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.
 
 ## Special Thanks to
-- Parrot - for building this beautiful bird, as well as for promoting and supporting Free and Open-Source Software!
-- zerotier - awesome product and excellent support!
+- Parrot - for building this beautiful bird, as well as for promoting and supporting Free and Open-Source Software
+- ZeroTier - awesome product and excellent support
+- Glympse - great app and outstanding API
+- Andres Toomsalu
+- Brian
+- Josh Mason
 
 **TODO: ask and add ppl who contributed**
 
