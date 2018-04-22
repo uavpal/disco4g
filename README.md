@@ -108,6 +108,7 @@ Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/
 - Brian
 - John Dreadwing
 - Josh Mason
+- Phil
 
 ## Disclaimer
 This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco entirely at YOUR OWN RISK!!!
