@@ -1,7 +1,7 @@
 # Parrot Disco over 4G/LTE (softmod)
 
 ## About
-Disco4G is a software modification (softmod) for the Parrot Disco drone. Instead of the built-in regular Wi-Fi, it allows to use a 4G/LTE cellular/mobile network connection to link Skycontroller 2 to the Disco. Control/telemetry and live video stream are routed through the 4G/LTE connection. In other words, range limit becomes your imagination! Ok, to be fair, it's still limited by the battery ;)
+Disco4G is a software modification (softmod) for the Parrot Disco drone. Instead of the built-in regular Wi-Fi, it allows to use a 4G/LTE cellular/mobile network connection to link Skycontroller 2 to the Disco. Control/telemetry and live video stream are routed through the 4G/LTE connection. In other words, range limit becomes your imagination! Ok, to be fair, it's still limited by the battery :stuck_out_tongue_winking_eye:
 
 ![Disco4G softmod](https://image.ibb.co/dCDKP7/disco_lte_github.jpg) [![Youtube video](https://image.ibb.co/dEzTMn/youtubedisco4g.png)](https://www.youtube.com/watch?v=1Txyy7Xstms)
 
@@ -23,7 +23,7 @@ Cons:
 
 ## Why?
 - The Parrot Disco's stock Wi-Fi loses video signal way before the specified 2 km.
-- Because we can :)
+- Because we can 😄
 
 ## How does it work?
 ![High-level connection diagram](https://preview.ibb.co/c8qPP7/disco4g_highlevel_diagram_end2end.png)
