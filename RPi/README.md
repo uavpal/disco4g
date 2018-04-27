@@ -204,9 +204,6 @@ EOF
 # make route script executable
 chmod +x /usr/local/bin/$IFACE-routes
 
-# bring wlanX (and hostapd) up
-ifup $IFACE
-
 # create dnsmasq dhcp server configuration for PISCO AP
 # shell variables required:
 # IFACE
@@ -224,6 +221,9 @@ EOF
 
 # (re)start dnsmasq service
 systemctl restart dnsmasq
+
+# bring wlanX (and hostapd) up
+ifup $IFACE
 ```
 
 ### Setup drone discovery over zeroconf 
