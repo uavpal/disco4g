@@ -23,7 +23,7 @@ Cons:
 
 ## Why?
 - The Parrot Disco's stock Wi-Fi loses video signal way before the specified 2 km.
-- Because we can 😄
+- Because we can :grin:
 
 ## How does it work?
 ![High-level connection diagram](https://preview.ibb.co/c8qPP7/disco4g_highlevel_diagram_end2end.png)
