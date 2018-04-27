@@ -67,7 +67,7 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 - Zerotier account (free)
 - Glympse App for independent real-time GPS tracking (optional) - free Glympse Developer account required
 
-*Successfully tested using:*
+*<a name="supportedhw">Successfully tested using:</a>*
 - Mobile tethering device: iPhone X (iOS 11.3)
 - 4G/LTE USB Modem: Huawei E3372s-153, E3372h-153, E3372h-510, E3372s-607
 - USB-connected device with FreeFlight Pro App: iPad Pro (iOS 11.3), iPhone X (iOS 11.3)
