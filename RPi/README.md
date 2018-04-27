@@ -105,9 +105,22 @@ echo $DISCO_IE
 # NB! Change DISCO name to PISCO
 # AND increment by +1 last digit of DISCO_ID and 3rd digit from backwards of DISCO_IE value 
 # (increment the Y char in examples)
-
+# final results should be having following format/changes
 PISCO_ID="PISCO-XXXXXY"
 PISCO_IE="DDXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXY00"
+
+# producing PISCO_ID
+DISCO_BASE=${DISCO_ID:0:-1}
+DISCO_INCR=${DISCO_ID: -1}
+let DISCO_INCR+=1
+PISCO_INCR=${DISCO_INCR: -1}
+PISCO_ID="PISCO-${DISCO_BASE}${PISCO_INCR}"
+echo $PISCO_ID
+
+# producing PISCO_IE
+DISCO_IE_BASE=${DISCO_IE:0:-3}
+PISCO_IE="${DISCO_IE_BASE}${PISCO_INCR}00"
+echo $PISCO_IE
 
 # install software for creating PISCO Access Point
 apt-get install hostapd dnsmasq wpasupplicant
