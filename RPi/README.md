@@ -305,6 +305,8 @@ Name = rpi
 AddressFamily = ipv4
 Interface = tun0
 ConnectTo = cloud
+PriorityInheritance = yes
+ProcessPriority = high
 EOF
 
 # create vpn up script
@@ -313,13 +315,13 @@ EOF
 
 cat << EOF > /etc/tinc/vpn0/tinc-up
 ifconfig \$INTERFACE $NODE_VPN_IPADDR netmask 255.255.255.0
-ip route add 192.168.42.0/24 dev tun0 proto kernel scope link src $NODE_VPN_IPADDR metric 200
-ip route del 192.168.42.0/24 dev tun0 proto kernel scope link src $NODE_VPN_IPADDR
-ip route add 192.168.42.1 dev tun0
+ip route add 192.168.42.0/24 dev \$INTERFACE proto kernel scope link src $NODE_VPN_IPADDR metric 200
+ip route del 192.168.42.0/24 dev \$INTERFACE proto kernel scope link src $NODE_VPN_IPADDR
+ip route add 192.168.42.1 dev \$INTERFACE
 EOF
 
 # add peer routes
-for PEER in $PEER_VPN_NODES; do echo "route add $PEER dev $INTERFACE" >> etc/tinc/tinc-up; done
+for PEER in $PEER_VPN_NODES; do echo "ip route add $PEER dev \$INTERFACE" >> /etc/tinc/vpn0/tinc-up; done
 
 # create vpn down script
 cat << 'EOF' > /etc/tinc/vpn0/tinc-down
