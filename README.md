@@ -35,7 +35,7 @@ The Disco requires a 4G/LTE USB modem to be able to send and receive data via ce
 
 Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply pressing the Settings button twice on Skycontroller 2.
 
-![Settings Button on Skycontroller 2](http://image.ibb.co/iBWcgn/settingsbutton.jpg)
+![Settings Button on Skycontroller 2](https://image.ibb.co/iBWcgn/settingsbutton.jpg)
 
 The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE connection to the Disco is established.
 
