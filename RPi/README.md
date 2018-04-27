@@ -12,7 +12,59 @@ Currently RPi is required in order to pretend as another Disco drone to SC2 and 
 
 ### Raspbian installation
 
-https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
+* https://www.raspberrypi.org/documentation/installation/installing-images/ 
+* https://downloads.raspberrypi.org/raspbian_lite_latest
+* https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
+
+```bash
+# download latest raspbian OS image
+curl -O https://downloads.raspberrypi.org/raspbian_lite_latest
+unzip 2018-04-18-raspbian-stretch-lite.zip
+
+# download and install etcher.io image installer
+https://etcher.io
+
+# fire up etcher.io app and flash downloaded Raspbian image to microSD card
+
+# Add "ssh" File to the SD card boot filesystem (this is MacOSX specific example here)
+sudo touch /Volumes/boot/ssh
+
+# boot raspbian
+# lookup RPi DHCP IP from LAN router (or monitor network with tcpdump)
+# login with pi:raspberry
+ssh pi@<rpi_ipaddr>
+
+# NB! Change default password!
+passwd
+
+# change to root user
+sudo su -
+
+# set root user passwd as well
+passwd
+
+# enable root user ssh login
+vi /etc/ssh/sshd_config
+--- MODIFY ---
+PermitRootLogin yes
+--- MODIFY ---
+
+# update OS
+apt-get update
+apt-get upgrade
+
+# install screen, vim
+apt-get install screen vim
+
+# disable rootfs filechecks on boot
+vim /etc/fstab
+--- MODIFY ---
+PARTUUID=e4ffb18f-02  /               ext4    defaults,noatime  0       0
+--- MODIFY ---
+
+# reboot for sshd config changes and possible kernel updates
+reboot
+```
 
 ### General configuration
 
