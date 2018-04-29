@@ -515,7 +515,7 @@ sudo raspi-config
 * Select Finish, and reboot the pi.
 
 # prepare for scripts
-apt-get install libxml2-utils
+apt-get install libxml2-utils bc
 cd /usr/local/bin/
 
 # install hilink-status script
