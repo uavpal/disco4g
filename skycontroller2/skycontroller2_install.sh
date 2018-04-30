@@ -26,7 +26,5 @@ echo "Creating zerotier-one directory"
 /data/ftp/uavpal/bin/adb shell "mkdir -p /data/lib/zerotier-one" 2>/dev/null
 echo "Creating symlink for zerotier-one's local config file"
 /data/ftp/uavpal/bin/adb shell "ln -s /data/lib/ftp/uavpal/conf/local.conf /data/lib/zerotier-one/local.conf" 2>/dev/null |grep -v 'File exists'
-echo "Rebooting Skycontroller 2"
-/data/ftp/uavpal/bin/adb shell "reboot" 2>/dev/null
 echo "All done! :)"
 echo
