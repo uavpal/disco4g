@@ -121,7 +121,7 @@ switch_to_lte()
 	ulogger -s -t uavpal_sc2 "... checking if zerotier needs to join a network"
 	if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 		ulogger -s -t uavpal_sc2 "... joining zerotier network ID"
-		sleep 1
+		sleep 3
 		ztjoin_response=`/data/lib/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
 		if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
 			ulogger -s -t uavpal_sc2 "... successfully joined zerotier network ID"
