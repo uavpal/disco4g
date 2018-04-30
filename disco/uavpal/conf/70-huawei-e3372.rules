@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/data/ftp/uavpal/bin/uavpal_disco.sh"
