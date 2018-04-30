@@ -126,7 +126,7 @@ switch_to_lte()
 		if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
 			ulogger -s -t uavpal_sc2 "... successfully joined zerotier network ID"
 		else
-			ulogger -s -t uavpal_sc2 "... ERROR joining zerotier network ID"
+			ulogger -s -t uavpal_sc2 "... ERROR joining zerotier network ID: $ztjoin_response"
 		fi
 	fi
 
