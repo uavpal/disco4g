@@ -101,6 +101,8 @@ If you insist, feel free to donate any amount you like. We will mainly use donat
 ## Contact/Contribute
 Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.
 
+Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (please do not use email for issues/troubleshooting help. Join our Slack community instead!)
+
 ## Special Thanks to
 - Parrot - for building this beautiful bird, as well as for promoting and supporting Free and Open-Source Software
 - ZeroTier - awesome product and excellent support
