@@ -13,8 +13,8 @@ main()
 	echo wifi >/tmp/mode
 	echo 0 >/tmp/button_prev_timestamp
 
-	# background pinging of disco via zt0, change LED to blue if ping ok - needed to override green LED after a successful mppd reconnect
-	while true; do if ping -c 1 -I zt0 192.168.42.1 >/dev/null 2>&1; then mpp_bb_cli on 3; fi; sleep 1; done &
+	# background pinging of disco via zt*, change LED to blue if ping ok - needed to override green LED after a successful mppd reconnect
+	while true; do if ping -c 1 -I `head -1 /tmp/zt_interface` 192.168.42.1 >/dev/null 2>&1; then mpp_bb_cli on 3; fi; sleep 1; done &
 
 	# wait for mppd to be idle (to absorb the power button press from a cold start)
 	until [ "$(ulogcat -d |grep mppd |grep "state=IDLE" |wc -l)" -gt "0" ]; do sleep 1; done
@@ -129,16 +129,18 @@ switch_to_lte()
 			ulogger -s -t uavpal_sc2 "... ERROR joining zerotier network ID"
 		fi
 	fi
-	
+
 	for p in `seq 1 $zerotier_iface_timeout_seconds`
 	do
-		if ip route add 192.168.42.1/32 dev zt0; then
-			ulogger -s -t uavpal_sc2 "... added IP route for disco via zerotier successfully"
+		zt_interface=`/data/lib/ftp/uavpal/bin/zerotier-one -q listnetworks -j |grep portDeviceName | cut -d '"' -f 4`
+		if ip route add 192.168.42.1/32 dev $zt_interface; then
+			ulogger -s -t uavpal_sc2 "... added IP route for disco via zerotier interface $zt_interface successfully"
+			echo $zt_interface >/tmp/zt_interface
 			break # break out of loop
 		fi
 		sleep 1
 		if [ "$p" -eq "$zerotier_iface_timeout_seconds" ]; then
-			ulogger -s -t uavpal_sc2 "... zerotier IP route for disco could not be set - most probably due to zerotier daemon not bringing up the network interface zt0 within $zerotier_iface_timeout_seconds seconds - switching back to Wi-Fi"
+			ulogger -s -t uavpal_sc2 "... zerotier IP route for disco could not be set - most probably due to zerotier daemon not bringing up the network interface zt* within $zerotier_iface_timeout_seconds seconds - switching back to Wi-Fi"
 			switch_to_wifi
 			return # back to main()
 		fi
@@ -147,7 +149,7 @@ switch_to_lte()
 	for p in `seq 1 $disco4g_ping_retry`
 	do
 		ulogger -s -t uavpal_sc2 "... trying to ping disco via 4G/LTE through zerotier (try $p of $disco4g_ping_retry)"
-		if ping -c 1 -I zt0 192.168.42.1 >/dev/null 2>&1; then
+		if ping -c 1 -I $zt_interface 192.168.42.1 >/dev/null 2>&1; then
 			ulogger -s -t uavpal_sc2 "... successfully received ping echo from disco via zerotier over 4G/LTE"
 			break # break out of loop
 		fi

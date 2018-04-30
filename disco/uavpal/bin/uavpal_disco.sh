@@ -17,7 +17,7 @@ insmod /data/ftp/uavpal/mod/iptable_filter.ko
 insmod /data/ftp/uavpal/mod/xt_tcpudp.ko
 
 # Security: block incoming connections on the Internet interfaces (ppp* for E3372s and eth1 for E3372h)
-# these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt0)
+# these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt*)
 ulogger -s -t uavpal_disco "... applying iptables security rules"
 if_block='ppp+ eth1'
 for i in $if_block
@@ -107,7 +107,7 @@ if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 	if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
 		ulogger -s -t uavpal_disco "... successfully joined zerotier network ID"
 	else
-		ulogger -s -t uavpal_disco "... ERROR joining zerotier network ID"
+		ulogger -s -t uavpal_disco "... ERROR joining zerotier network ID: $ztjoin_response"
 	fi
 fi
 
