@@ -99,16 +99,19 @@ ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 ulogger -s -t uavpal_disco "... starting zerotier daemon"
 /data/ftp/uavpal/bin/zerotier-one -d
 
-ulogger -s -t uavpal_disco "... checking if zerotier needs to join a network"
 if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
-	ulogger -s -t uavpal_disco "... joining zerotier network ID"
-	sleep 3
-	ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
-	if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
-		ulogger -s -t uavpal_disco "... successfully joined zerotier network ID"
-	else
-		ulogger -s -t uavpal_disco "... ERROR joining zerotier network ID: $ztjoin_response"
-	fi
+	ulogger -s -t uavpal_disco "... (initial-)joining zerotier network ID"
+	while true
+	do
+		ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
+		if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
+			ulogger -s -t uavpal_disco "... successfully joined zerotier network ID"
+			break # break out of loop
+		else
+			ulogger -s -t uavpal_disco "... ERROR joining zerotier network ID: $ztjoin_response - trying again"
+			sleep 1
+		fi
+	done
 fi
 
 ulogger -s -t uavpal_disco "... looping to keep script alive. ugly, yes!"
