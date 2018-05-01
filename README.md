@@ -1,7 +1,7 @@
 # Parrot Disco over 4G/LTE (softmod)
 
 ## About
-Disco4G is a software modification (softmod) for the Parrot Disco drone. Instead of the built-in regular Wi-Fi, it allows to use a 4G/LTE cellular/mobile network connection to link Skycontroller 2 to the Disco. Control/telemetry and live video stream are routed through the 4G/LTE connection. In other words, range limit becomes your imagination! Ok, to be fair, it's still limited by the battery :stuck_out_tongue_winking_eye:
+Disco4G is a software modification (softmod) for the Parrot Disco drone. Instead of the built-in regular Wi-Fi, it allows to use a 4G/LTE cellular/mobile network connection to link Skycontroller 2 to the Disco. Control/telemetry and live video stream are routed through the 4G/LTE connection. In other words, range limit becomes your imagination! Ok, to be fair, it's still limited by the battery capacity :stuck_out_tongue_winking_eye:
 
 ![Disco4G softmod](https://image.ibb.co/eP6A3c/disco4glte.jpg) [![Youtube video](http://uavpal.com/img/disco4g_yt_old.png)](https://www.youtube.com/watch?v=1Txyy7Xstms)
 
@@ -31,7 +31,7 @@ The Disco requires a 4G/LTE USB modem to be able to send and receive data via ce
 
 ![USB Modem inside Disco's canopy](https://preview.ibb.co/g5rgNS/modem_in_disco.jpg)
 
-Initiation of the 4G/LTE connection (and switch back to Wi-Fi) is done by simply pressing the Settings button twice on Skycontroller 2.
+Initiation of the 4G/LTE connection (and switch back to Wi-Fi) can be done by simply pressing the Settings button twice on Skycontroller 2.
 
 ![Settings Button on Skycontroller 2](https://image.ibb.co/iBWcgn/settingsbutton.jpg)
 
@@ -43,7 +43,7 @@ Once up in the air, everything works in the same manner as with the stock Wi-Fi 
 
 Note: The mobile device running FreeFlight Pro (the one conneted to Skycontroller 2 via USB) can even be the same as the mobile tethering device/phone.
 
-We use [ZeroTier](https://zerotier.com), a free online service, to manage the connection between Disco and Skycontroller 2. This allows to do NAT traversal which is required due to the mobile tethering device and even some modems. It also depends on your mobile network operator, whether direct 4G/LTE-internal connections are allowed or not. ZeroTier allows to connect the two devices via an encrypted channel, regardless of the network topology.
+[ZeroTier](https://zerotier.com) is a free online service, which we use to manage the connection between Disco and Skycontroller 2. This allows to do NAT traversal which is required due to the mobile tethering device and even some modems. Whether direct 4G/LTE-internal connections are allowed depends on your mobile network operator. ZeroTier allows to connect Skycontroller 2 to your Disco via an encrypted channel, regardless of the network topology.
 
 Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android allows independent real-time GPS tracking of the Disco via 4G/LTE. This can be particularily useful to recover the Disco in the unfortunate event of a crash or flyaway.
 
@@ -73,7 +73,7 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 - Parrot Skycontroller 2, Firmware 1.0.7
 - FreeFlight Pro 5.2.0 on iOS
 
-Please [report](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, we will update this list.
+[Drop us a note](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, so we can keep this list updated.
 
 ## Installation
 Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation).
@@ -85,10 +85,10 @@ Please see Wiki article [How to fly on 4G/LTE? (User Manual)](https://github.com
 Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ).
 
 ## Is it really free? Are you crazy?
-Yes and yes! This softmod has been developed during countless days and nights by RC hobbyists and technology enthusiasts without any commercial intention.
-Everyone can download our code for free and transform his/her Disco into a 4G/LTE enabled fixed-wing drone by following the instructions provided.
+Yes and yes! This softmod has been developed over countless of days and nights by RC hobbyists and technology enthusiasts with zero commercial intention.
+Anyone can download our code for free and transform his/her Disco into a 4G/LTE enabled fixed-wing drone by following the instructions provided.
 
-_However_, we highly appreciate [feedback and active contribution](#contactcontribute) in improving and maintaining this project.
+_However_, we highly appreciate [feedback and active contribution](#contactcontribute) to improve and maintain this project.
 
 ![Shut up and take my money!](http://image.ibb.co/cLw9SS/shut_up_and_take_my_money.jpg)
 
@@ -111,6 +111,6 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - Phil
 
 ## Disclaimer
-This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco entirely at YOUR OWN RISK!!!
+This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco at YOUR OWN RISK!!!
 
 
