@@ -5,8 +5,6 @@ Disco4G is a software modification (softmod) for the Parrot Disco drone. Instead
 
 ![Disco4G softmod](https://image.ibb.co/eP6A3c/disco4glte.jpg) [![Youtube video](http://uavpal.com/img/disco4g_yt_old.png)](https://www.youtube.com/watch?v=1Txyy7Xstms)
 
-**New Youtube Video coming soon!**
-
 Pros:
 - Range limit is no longer dependent on Wi-Fi signal
 - Low hardware cost (around US$ 40.-)
