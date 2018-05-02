@@ -49,15 +49,20 @@ do
 		rmmod option
 		rmmod usb_wwan
 		rmmod usbserial
+		ulogger -s -t uavpal_disco "... bringing up Hi-Link network interface"
+		ifconfig eth1 up
+		ulogger -s -t uavpal_disco "... requesting IP address from modem's DHCP server"
+		hilink_ip=`udhcpc -i eth1 -n -t 10 2>&1 |grep obtained | awk '{ print $4 }'`
+		hilink_router_ip=$(echo `echo $hilink_ip | cut -d '.' -f 1,2,3`.1)
 		ulogger -s -t uavpal_disco "... setting IP and route"
-		ifconfig eth1 192.168.8.100 netmask 255.255.255.0
-		ip route add default via 192.168.8.1 dev eth1
+		ifconfig eth1 ${hilink_ip} netmask 255.255.255.0
+		ip route add default via ${hilink_router_ip} dev eth1
 		ulogger -s -t uavpal_disco "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
-		sessionInfo=`/data/ftp/uavpal/bin/curl -s -X GET "http://192.168.8.1/api/webserver/SesTokInfo"`
+		sessionInfo=`/data/ftp/uavpal/bin/curl -s -X GET "http://${hilink_router_ip}/api/webserver/SesTokInfo"`
 		cookie=`echo "$sessionInfo" | grep "SessionID=" | cut -b 10-147`
 		token=`echo "$sessionInfo" | grep "TokInfo" | cut -b 10-41`
-		/data/ftp/uavpal/bin/curl -s -X POST "http://192.168.8.1/api/security/dmz" -d "<request><DmzStatus>1</DmzStatus><DmzIPAddress>192.168.8.100</DmzIPAddress></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token"
+		/data/ftp/uavpal/bin/curl -s -X POST "http://${hilink_router_ip}/api/security/dmz" -d "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token"
 		break 1 # break out of while loop
 	fi
 
