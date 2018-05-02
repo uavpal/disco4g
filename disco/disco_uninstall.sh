@@ -2,8 +2,8 @@
 echo "=== Uninstalling Disco4G on Disco ==="
 echo "Remounting filesystem as read/write"
 mount -o remount,rw /
-echo "Removing symlink for ppp-lte settings"
-rm -f /etc/ppp/peers/lte
+echo "Removing ppp directory including symlink for ppp-lte settings"
+rm -rf /etc/ppp/peers
 echo "Removing symlink udev rule"
 rm -f /lib/udev/rules.d/70-huawei-e3372.rules
 echo "Removing symlink for ntpd's config file"

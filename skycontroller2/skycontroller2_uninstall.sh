@@ -1,6 +1,5 @@
 #!/bin/sh
 echo "=== Uninstalling Disco4G on Skycontroller 2 ==="
-# ip_sc2=`grep -i 'a0:14:3d' /var/lib/misc/dhcp_eth0.leases | head -1 | awk '{ print $3 }'`
 ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
 chmod +x /tmp/disco4g/disco/uavpal/bin/adb
 until /tmp/disco4g/disco/uavpal/bin/adb connect ${ip_sc2}:9050 2>/dev/null;
