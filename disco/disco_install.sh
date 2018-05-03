@@ -20,5 +20,7 @@ echo "Creating zerotier-one directory"
 mkdir -p /data/lib/zerotier-one
 echo "Creating symlink for zerotier-one's local config file"
 ln -s /data/ftp/uavpal/conf/local.conf /data/lib/zerotier-one/local.conf 2>&1 |grep -v 'File exists'
+echo "Removing uavpal softmod installation files"
+rm -rf /data/ftp/disco4g*
 echo "All done! :)"
 echo

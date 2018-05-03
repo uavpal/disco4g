@@ -12,7 +12,9 @@ echo "Remounting filesystem as read-only"
 mount -o remount,ro /
 echo "Removing zerotier-one data"
 rm -rf /data/lib/zerotier-one
-echo "Removing uavpal softmod filesCreating symlink for zerotier-one's local config file"
+echo "Removing uavpal softmod files"
 rm -rf /data/ftp/uavpal
+echo "Removing uavpal softmod installation files"
+rm -rf /data/ftp/disco4g*
 echo "All done! :)"
 echo
