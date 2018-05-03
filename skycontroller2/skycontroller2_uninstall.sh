@@ -14,7 +14,7 @@ echo "Remounting filesystem as read-only"
 /tmp/disco4g/disco/uavpal/bin/adb shell "mount -o remount,ro /" 2>/dev/null
 echo "Removing zerotier-one data"
 /tmp/disco4g/disco/uavpal/bin/adb shell "rm -rf /data/lib/zerotier-one" 2>/dev/null
-echo "Removing uavpal softmod filesCreating symlink for zerotier-one's local config file"
+echo "Removing uavpal softmod files"
 /tmp/disco4g/disco/uavpal/bin/adb shell "rm -rf /data/lib/ftp/uavpal" 2>/dev/null
 echo "All done! :)"
 echo
