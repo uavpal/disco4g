@@ -31,8 +31,8 @@ OK		ATE1
 # except for 1 which means "full functionality".
 #OK		AT+CFUN=1
 
-#OK		AT+CGDCONT=1,"IP","\T","",0,0
-OK		AT\^NDISDUP=1,1,"\T"
+OK		AT+CGDCONT=1,"IP","\T"
+OK		AT\^NDISDUP=1,1
 OK		ATD*99#
 TIMEOUT		22
 CONNECT		""
