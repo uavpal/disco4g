@@ -22,17 +22,17 @@ ulogger -s -t uavpal_disco "... applying iptables security rules"
 if_block='ppp+ eth1'
 for i in $if_block
 do
-	iptables -I INPUT -p tcp -i eth1 --dport 21 -j DROP      # inetd (ftp:/data/ftp)
-	iptables -I INPUT -p tcp -i eth1 --dport 23 -j DROP      # telnet
-	iptables -I INPUT -p tcp -i eth1 --dport 51 -j DROP      # inetd (ftp:/update)
-	iptables -I INPUT -p tcp -i eth1 --dport 61 -j DROP      # inetd (ftp:/data/ftp/internal_000/flightplans)
-	iptables -I INPUT -p tcp -i eth1 --dport 873 -j DROP     # rsync
-	iptables -I INPUT -p tcp -i eth1 --dport 8888 -j DROP    # dragon-prog
-	iptables -I INPUT -p tcp -i eth1 --dport 9050 -j DROP    # adb
-	iptables -I INPUT -p tcp -i eth1 --dport 44444 -j DROP   # dragon-prog
-	iptables -I INPUT -p udp -i eth1 --dport 67 -j DROP      # dnsmasq
-	iptables -I INPUT -p udp -i eth1 --dport 5353 -j DROP    # avahi-daemon
-	iptables -I INPUT -p udp -i eth1 --dport 14551 -j DROP   # dragon-prog
+	iptables -I INPUT -p tcp -i $i --dport 21 -j DROP      # inetd (ftp:/data/ftp)
+	iptables -I INPUT -p tcp -i $i --dport 23 -j DROP      # telnet
+	iptables -I INPUT -p tcp -i $i --dport 51 -j DROP      # inetd (ftp:/update)
+	iptables -I INPUT -p tcp -i $i --dport 61 -j DROP      # inetd (ftp:/data/ftp/internal_000/flightplans)
+	iptables -I INPUT -p tcp -i $i --dport 873 -j DROP     # rsync
+	iptables -I INPUT -p tcp -i $i --dport 8888 -j DROP    # dragon-prog
+	iptables -I INPUT -p tcp -i $i --dport 9050 -j DROP    # adb
+	iptables -I INPUT -p tcp -i $i --dport 44444 -j DROP   # dragon-prog
+	iptables -I INPUT -p udp -i $i --dport 67 -j DROP      # dnsmasq
+	iptables -I INPUT -p udp -i $i --dport 5353 -j DROP    # avahi-daemon
+	iptables -I INPUT -p udp -i $i --dport 14551 -j DROP   # dragon-prog
 done
 
 ulogger -s -t uavpal_disco "... running usb_modeswitch"
