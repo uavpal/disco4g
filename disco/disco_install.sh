@@ -2,6 +2,8 @@
 echo "=== Installing Disco4G on Disco ==="
 echo "Copying softmod files to target directory"
 cp -fr /tmp/disco4g/disco/uavpal /data/ftp
+echo "Removing softmod kernel modules from previous releases, if any exist"
+rm -f /data/ftp/uavpal/mod/*.ko 2>/dev/null
 echo "Making binaries and scripts executable"
 chmod +x /data/ftp/uavpal/bin/*
 echo "Remounting filesystem as read/write"

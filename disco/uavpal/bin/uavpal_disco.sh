@@ -1,20 +1,36 @@
 #!/bin/sh
+for pid in $(pidof uavpal_disco.sh); do
+	if [ $pid != $$ ]; then
+		ulogger -s -t uavpal_disco "... script is already running with PID $pid (exiting!)"
+		exit 1
+	  fi
+done
+
 ulogger -s -t uavpal_disco "Huawei USB device detected"
 ulogger -s -t uavpal_disco "=== Enabling LTE ==="
 
+disco_fw_version=`grep ro.parrot.build.uid /etc/build.prop | cut -d '-' -f 3`
+disco_fw_version_numeric=${disco_fw_version//.}
+if [ "$disco_fw_version_numeric" -ge "170" ]; then
+	kernel_mods="1.7.0"
+else
+	kernel_mods="1.4.1"
+fi
+ulogger -s -t uavpal_disco "... detected Disco firmware version ${disco_fw_version}, trying to use kernel modules compiled for firmware ${kernel_mods}"
+
 ulogger -s -t uavpal_disco "... loading tunnel kernel module (for zerotier)"
-insmod /data/ftp/uavpal/mod/tun.ko
+insmod /data/ftp/uavpal/mod/${kernel_mods}/tun.ko
 
 ulogger -s -t uavpal_disco "... loading E3372s kernel modules (required for detection)"
-insmod /data/ftp/uavpal/mod/usbserial.ko 
-insmod /data/ftp/uavpal/mod/usb_wwan.ko
-insmod /data/ftp/uavpal/mod/option.ko
+insmod /data/ftp/uavpal/mod/${kernel_mods}/usbserial.ko 
+insmod /data/ftp/uavpal/mod/${kernel_mods}/usb_wwan.ko
+insmod /data/ftp/uavpal/mod/${kernel_mods}/option.ko
 
 ulogger -s -t uavpal_disco "... loading iptables kernel modules (required for security)"
-insmod /data/ftp/uavpal/mod/x_tables.ko
-insmod /data/ftp/uavpal/mod/ip_tables.ko
-insmod /data/ftp/uavpal/mod/iptable_filter.ko
-insmod /data/ftp/uavpal/mod/xt_tcpudp.ko
+insmod /data/ftp/uavpal/mod/${kernel_mods}/x_tables.ko                  # needed for firmware <=1.4.1 only
+insmod /data/ftp/uavpal/mod/${kernel_mods}/ip_tables.ko                 # needed for firmware <=1.4.1 only
+insmod /data/ftp/uavpal/mod/${kernel_mods}/iptable_filter.ko            # needed for firmware <=1.4.1 and >=1.7.0
+insmod /data/ftp/uavpal/mod/${kernel_mods}/xt_tcpudp.ko                 # needed for firmware <=1.4.1 only
 
 # Security: block incoming connections on the Internet interfaces (ppp* for E3372s and eth1 for E3372h)
 # these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt*)
@@ -63,6 +79,8 @@ do
 		cookie=`echo "$sessionInfo" | grep "SessionID=" | cut -b 10-147`
 		token=`echo "$sessionInfo" | grep "TokInfo" | cut -b 10-41`
 		/data/ftp/uavpal/bin/curl -s -X POST "http://${hilink_router_ip}/api/security/dmz" -d "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token"
+		ulogger -s -t uavpal_disco "... starting hilink script to inform SC2 of drone's WAN IP"
+		/data/ftp/uavpal/bin/uavpal_hilink.sh ${hilink_router_ip} &
 		break 1 # break out of while loop
 	fi
 
@@ -71,12 +89,12 @@ do
 		huawei_mode="stick"
 		ulogger -s -t uavpal_disco "... detected Huawei USB modem in Stick mode"
 		ulogger -s -t uavpal_disco "... loading ppp kernel modules"
-		insmod /data/ftp/uavpal/mod/crc-ccitt.ko
-		insmod /data/ftp/uavpal/mod/slhc.ko
-		insmod /data/ftp/uavpal/mod/ppp_generic.ko
-		insmod /data/ftp/uavpal/mod/ppp_async.ko
-		insmod /data/ftp/uavpal/mod/ppp_deflate.ko
-		insmod /data/ftp/uavpal/mod/bsd_comp.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/crc-ccitt.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/slhc.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_generic.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_async.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_deflate.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/bsd_comp.ko
 		ulogger -s -t uavpal_disco "... running pppd to connect to LTE network"
 		LD_PRELOAD=/data/ftp/uavpal/lib/libpam.so.0:/data/ftp/uavpal/lib/libpcap.so.0.8:/data/ftp/uavpal/lib/libaudit.so.1 /data/ftp/uavpal/bin/pppd call lte
 		break 1 # break out of while loop
@@ -118,7 +136,6 @@ if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 		fi
 	done
 fi
-
 ulogger -s -t uavpal_disco "... looping to keep script alive. ugly, yes!"
 ulogger -s -t uavpal_disco "*** idle on LTE ***"
 while true; do sleep 10; done
