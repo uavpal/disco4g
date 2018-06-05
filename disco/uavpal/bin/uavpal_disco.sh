@@ -21,7 +21,7 @@ ulogger -s -t uavpal_disco "... detected Disco firmware version ${disco_fw_versi
 ulogger -s -t uavpal_disco "... loading tunnel kernel module (for zerotier)"
 insmod /data/ftp/uavpal/mod/${kernel_mods}/tun.ko
 
-ulogger -s -t uavpal_disco "... loading E3372s kernel modules (required for detection)"
+ulogger -s -t uavpal_disco "... loading E3372 firmware 21.x kernel modules (required for detection)"
 insmod /data/ftp/uavpal/mod/${kernel_mods}/usbserial.ko 
 insmod /data/ftp/uavpal/mod/${kernel_mods}/usb_wwan.ko
 insmod /data/ftp/uavpal/mod/${kernel_mods}/option.ko
@@ -32,7 +32,7 @@ insmod /data/ftp/uavpal/mod/${kernel_mods}/ip_tables.ko                 # needed
 insmod /data/ftp/uavpal/mod/${kernel_mods}/iptable_filter.ko            # needed for firmware <=1.4.1 and >=1.7.0
 insmod /data/ftp/uavpal/mod/${kernel_mods}/xt_tcpudp.ko                 # needed for firmware <=1.4.1 only
 
-# Security: block incoming connections on the Internet interfaces (ppp* for E3372s and eth1 for E3372h)
+# Security: block incoming connections on the Internet interfaces (ppp* for E3372 firmware 21.x and eth1 for firmware 22.x)
 # these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt*)
 ulogger -s -t uavpal_disco "... applying iptables security rules"
 if_block='ppp+ eth1'
@@ -61,7 +61,7 @@ do
 	if [ -d "/proc/sys/net/ipv4/conf/eth1" ]; then
 		huawei_mode="hilink"
 		ulogger -s -t uavpal_disco "... detected Huawei USB modem in Hi-Link mode"
-		ulogger -s -t uavpal_disco "... unloading E3372s kernel modules (not required as Hi-Link was detected)"
+		ulogger -s -t uavpal_disco "... unloading E3372 firmware 21.x kernel modules (not required as Hi-Link was detected)"
 		rmmod option
 		rmmod usb_wwan
 		rmmod usbserial
