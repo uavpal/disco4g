@@ -57,8 +57,20 @@ ticket=$(parse_json $glympseCreateTicket id)
 ulogger -s -t uavpal_glympse "... Glympse API: creating invite"
 glympseCreateInvite=$(/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST "https://api.glympse.com/v2/tickets/$ticket/create_invite?type=sms&address=1234567890&send=client")
 
-ulogger -s -t uavpal_glympse "... Glympse API: calling uavpal_sms"
-/data/ftp/uavpal/bin/uavpal_sms.sh $1 "`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`" "You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
+message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
+title="${droneName}'s GPS location"
+
+phone_no=`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`
+if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
+	ulogger -s -t uavpal_glympse "... calling uavpal_sms"
+	/data/ftp/uavpal/bin/uavpal_sms.sh $1 "$phone_no" "$message"
+fi
+
+pb_access_token=`head -1 /data/ftp/uavpal/conf/pushbullet |tr -d '\r\n' |tr -d '\n'`
+if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
+	ulogger -s -t uavpal_glympse "... sending push notification"
+	/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$title"'", "body": "'"$message"'"}'
+fi
 
 ulogger -s -t uavpal_glympse "... Glympse API: setting identifier to Disco ID"
 /data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneName}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
