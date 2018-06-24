@@ -107,6 +107,7 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - Glympse - great app and outstanding API
 - Andres Toomsalu
 - Brian
+- Carlo Comin
 - John Dreadwing
 - Josh Mason
 - Phil
