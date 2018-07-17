@@ -57,7 +57,11 @@ echo 1 >/proc/sys/net/ipv4/conf/$INTERFACE/proxy_arp
 EOF
 
 # add peer routes
-for PEER in $PEER_VPN_NODES; do echo "route add $PEER dev $INTERFACE" >> etc/tinc/tinc-up; done
+for PEER in $PEER_VPN_NODES; do echo "ip route add ${PEER}/32 dev $INTERFACE" >> etc/tinc/tinc-up; done
+
+# remove 192.168.42.0/24 -> tun0 route
+# (fix for 4g usb unplug wifi reconnect problem)
+echo "ip route del 192.168.42.0/24 dev $INTERFACE" >> etc/tinc/tinc-up
 
 # create vpn down script
 cat << 'EOF' > etc/tinc/tinc-down
