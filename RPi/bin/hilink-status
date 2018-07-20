@@ -53,8 +53,8 @@ if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
 			CONN_STATUS_MAPPED="Unknown" ;;
 	esac
 
-	ULRATE_MBIT=$(echo "scale=1; x=$ULRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
-	DLRATE_MBIT=$(echo "scale=1; x=$DLRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
+	ULRATE_MBIT=$(echo "scale=2; x=$ULRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
+	DLRATE_MBIT=$(echo "scale=2; x=$DLRATE/1024/1024*8; if(x<1 && x!=0) print 0; x" | bc)
 
 	UPLOAD_MB=$(echo "scale=1; x=$UPLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
 	DLLOAD_MB=$(echo "scale=1; x=$DLLOAD/1024/1024; if(x<1 && x!=0) print 0; x" | bc)
