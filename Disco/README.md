@@ -84,3 +84,54 @@ sed -i '1 s/^/Subnet = '$NODE_VPN_NET'\n\n/' etc/tinc/hosts/disco
 # for starting the vpn just plug-in 4G dongle and let udev trigger vpn init scripts
 # tincd-init script (re-run safe): /data/ftp/internal_000/lte/bin/tincd-init
 ```
+
+## Optional: Limiting Disco video streaming bandwidth
+
+Sometimes you may desire to limit Disco video streaming bandwidth over 4G datalink - because:
+* lower quality video = less video lag on datalink (and perhaps more stable stream)
+* lower quality video = less bandwidth costs for 4G datalink
+
+Normally Disco streams video to FFPro either 2.4Mbit (when recording resolution is set to 1080p) or 4.8Mbit (when recording resolution is set to 720p). The latter case could mean that Disco streams also in 720p and in case of 1080p recording streaming is set to 480p.
+
+Disco's dragon-prog (ie the autopilot software) has '-q' option - which allows to limit available video streaming bandwidth (does not affect video recording resolution). Video streaming bandwidth limiting seems to work best in 0.8Mbit steps - and its advisable to leave some headroom (+0.2Mbit usually) with bandwith limit cap.
+
+'-q' parameter accepts values in kbits - and some tested values are:
+* -q 1800 => resulting 1.6Mbit streaming
+* -q 1000 => resulting  0.8Mbit streaming
+* -q 600 => resulting 0.6Mbit streaming
+
+Simplest method to set and persist dragon-prog -q parameter is to modify /usr/bin/DragonStarter.sh script in the following way:
+```bash
+# telnet to Disco (over WIFI)
+telnet 192.168.42.1
+
+# make backup copy of /usr/bin/DragonStarter.sh script
+cp -p /usr/bin/DragonStarter.sh /data/ftp/internal_000/lte/bin/
+
+# set streaming bandwidth limit as variable
+BW_LIMIT="600"
+
+# verify (output should not be empty and match value that was set!)
+echo $BW_LIMIT
+> example output
+600
+
+# re-mount root filesystem in read-write mode - allowing modifications
+mount -o remount,rw /
+
+# edit /usr/bin/DragonStarter.sh script
+# by replacing line no 7
+# DEFAULT_PROG="usr/bin/dragon-prog"
+# with
+# DEFAULT_PROG="usr/bin/dragon-prog -q 600"
+sed -i.bak "s/^DEFAULT_PROG=.*/DEFAULT_PROG=\"usr\/bin\/dragon-prog -q $BW_LIMIT\"/g" /usr/bin/DragonStarter.sh
+
+# verify change
+less /usr/bin/DragonStarter.sh
+
+# re-mount root filesystem in read-only mode - as it was before
+mount -o remount,ro /
+
+# reboot Disco for changes to take effect
+reboot
+```
