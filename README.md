@@ -42,7 +42,7 @@ The "Power" LED on Skycontroller 2 will change to solid blue once the 4G/LTE con
 
 Once up in the air, everything works in the same manner as with the stock Wi-Fi connection, e.g. flight plans, return-to-home (auto-initiated in case of connection loss), etc.
 
-Note: The mobile device running FreeFlight Pro (the one conneted to Skycontroller 2 via USB) can even be the same as the mobile tethering device/phone.
+Note: The mobile device running FreeFlight Pro (the one connected to Skycontroller 2 via USB) can even be the same as the mobile tethering device/phone.
 
 [ZeroTier](https://zerotier.com) is a free online service, which we use to manage the connection between Disco and Skycontroller 2. This allows to do NAT traversal which is required due to the mobile tethering device and even some modems. Whether direct 4G/LTE-internal connections are allowed depends on your mobile network operator. ZeroTier allows to connect Skycontroller 2 to your Disco via an encrypted channel, regardless of the network topology.
 
