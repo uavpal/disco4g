@@ -108,6 +108,7 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - Andres Toomsalu
 - Brian
 - Carlo Comin
+- [Dustin Dunnill](https://www.youtube.com/channel/UCVQWy-DTLpRqnuA17WZkjRQ)
 - John Dreadwing
 - Josh Mason
 - Phil
