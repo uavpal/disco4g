@@ -106,10 +106,12 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - ZeroTier - awesome product and excellent support
 - Glympse - great app and outstanding API
 - Andres Toomsalu
+- AussieGus
 - Brian
 - Carlo Comin
 - [Dustin Dunnill](https://www.youtube.com/channel/UCVQWy-DTLpRqnuA17WZkjRQ)
 - John Dreadwing
+- [Joris Dirks](https://djoris.nl)
 - Josh Mason
 - Phil
 
