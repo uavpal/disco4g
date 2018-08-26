@@ -1,0 +1,75 @@
+#!/bin/sh
+
+MODEM_IP="192.168.8.1"
+LOCAL_IP="192.168.8.100"
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/internal_000/lte/lib
+
+CURL="/data/ftp/internal_000/lte/bin/curl"
+
+if [ -n "$( ip addr | grep $LOCAL_IP )" ]; then
+
+	$CURL -s -X GET "http://$MODEM_IP/api/webserver/SesTokInfo" 2>/dev/null > /tmp/ses_tok.xml
+	COOKIE=`grep "SessionID=" /tmp/ses_tok.xml | cut -b 10-147`
+	TOKEN=`grep "TokInfo" /tmp/ses_tok.xml | cut -b 10-41`
+
+	$CURL -s -X GET "http://$MODEM_IP/api/monitoring/status" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" 2>/dev/null > /tmp/modem_status.xml
+
+	CONN_STATUS=$( xmllint --xpath "string(//ConnectionStatus)" /tmp/modem_status.xml )
+	SIGNAL_CURRENT=$( xmllint --xpath "string(//SignalIcon)" /tmp/modem_status.xml )
+	SIGNAL_MAX=$( xmllint --xpath "string(//maxsignal)" /tmp/modem_status.xml )
+
+	$CURL -s -X GET "http://$MODEM_IP/api/device/information" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" 2>/dev/null > /tmp/modem_info.xml
+
+	CONN_MODE=$( xmllint --xpath "string(//workmode)" /tmp/modem_info.xml )
+	WAN_ADDR=$( xmllint --xpath "string(//WanIPAddress)" /tmp/modem_info.xml )
+
+	$CURL -s -X GET "http://$MODEM_IP/api/monitoring/traffic-statistics" \
+	-H "Cookie: $COOKIE" -H "__RequestVerificationToken: $TOKEN" \
+	-H "Content-Type: text/xml" 2>/dev/null > /tmp/modem_usage.xml
+
+	UPTIME=$( xmllint --xpath "string(//CurrentConnectTime)" /tmp/modem_usage.xml )
+	if [ -z "$WAN_ADDR" ]; then
+		WAN_ADDR=$( xmllint --xpath "string(//WanIPAddress)" /tmp/modem_status.xml )
+	fi
+	
+	case $CONN_STATUS in
+		900 )
+			CONN_STATUS_MAPPED="Connecting..." ;;
+		901 )
+			CONN_STATUS_MAPPED="Connected" ;;
+		902 )
+			CONN_STATUS_MAPPED="Disconnected" ;;
+		* )
+			CONN_STATUS_MAPPED="Unknown" ;;
+	esac
+
+	GATEWAY=$( ip route | sort -k 9 | awk '/default via/ { print $3 }' | head -1 )
+	HOSTAPD_PID=$( pidof hostapd )
+	if [ -n "$HOSTAPD_PID" ]; then
+		HOSTAPD_STATUS="running ($HOSTAPD_PID)"
+	else
+		HOSTAPD_STATUS="ERR: not running"
+	fi
+
+	echo
+	echo -e "   status:\t$CONN_STATUS_MAPPED ($CONN_MODE)"
+	echo -e "   signal:\t$SIGNAL_CURRENT/$SIGNAL_MAX"
+	echo -e "   uptime:\t$( printf '%dh:%dm:%ds\n' $(($UPTIME/3600)) $(($UPTIME%3600/60)) $(($UPTIME%60)) )"
+	echo -e "   wan IP:\t$WAN_ADDR"
+	echo -e "   gateway:\t$GATEWAY"
+	echo
+
+else
+
+	echo
+	echo -e "   status:\tERR: No HiLINK"
+	echo
+
+fi
+
+exit 0

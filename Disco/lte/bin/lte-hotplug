@@ -19,4 +19,23 @@ ip route add default via 192.168.8.1 dev eth1 metric 209
 # start tinc VPN
 sh -c "/data/ftp/internal_000/lte/bin/tincd-init"
 
+ulogger -s -t uavpal_disco "... setting DNS servers statically (to Google)"
+echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
+
+ulogger -s -t uavpal_disco "... waiting for Internet connection"
+while true; do
+    if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+        ulogger -s -t uavpal_disco "... Internet connection is up"
+        break # break out of loop
+    fi
+done
+
+ulogger -s -t uavpal_disco "... setting date/time using ntp"
+ntpd -n -d -q
+
+ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
+/data/ftp/internal_000/lte/bin/hilink-monitor &
+/data/ftp/internal_000/lte/bin/altitude-monitor &
+/data/ftp/internal_000/lte/bin/uavpal_glympse.sh hilink &
+
 exit 0

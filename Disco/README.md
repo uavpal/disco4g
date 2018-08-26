@@ -18,9 +18,11 @@ telnet 192.168.42.1
 less /data/ftp/internal_000/lte/lib/70-huawei-e3372h-153.rules
 
 # install udev rule for 4G dongle modeswitching (to cdc_ether device)
+# and setup ntp.conf
 mount -o remount,rw /
 cp /data/ftp/internal_000/lte/lib/70-huawei-e3372h-153.rules /lib/udev/rules.d/
 chmod 644 /lib/udev/rules.d/70-huawei-e3372h-153.rules
+ln -s /data/ftp/internal_000/lte/etc/ntp.conf  /etc/ntp.conf
 mount -o remount,ro /
 
 ### setup tinc vpn
@@ -135,3 +137,29 @@ mount -o remount,ro /
 # reboot Disco for changes to take effect
 reboot
 ```
+
+## Optional: Setup Disco real-time tracking map with glympse.com
+
+Glympse.com provides REST API and web/mobile apps for real-time GPS tracking.
+Integration scripts provide the following:
+* Hilink 4G modem signal strength reading
+* Disco altitude reading
+* Location tracking
+
+In order to enable glympse.com integration create a free Glympse Developer account at https://developer.glympse.com/account/create:
+
+* Complete the form using a valid e-mail address.
+* Once verification e-mail is sent, click the "Verify Sign-up" link inside.
+* You will see "Your account has now been verified. Welcome aboard!"
+* Click "MY ACCOUNT" on top right and the "My Apps"
+* Click "New Application (+)"
+* Application Name: uavpal softmod
+* Platform: Web API
+* OS: Other
+* Click "Create"
+
+You should see the newly generated API Key now (20 characters), note it down as we need it later.
+
+In order to enable glympse.com tracking integration do the following:
+* insert Glympse API key into: /data/ftp/internal_000/lte/etc/glympse_apikey
+* insert your phonenumber to receive Glympse tracking link via SMS here: /data/ftp/internal_000/lte/etc/phonenumber  

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+ALTITUDE=0
+echo $ALTITUDE > /tmp/altitude
+while true; do
+  if [ -f /data/ftp/internal_000/Disco/academy/*.pud.temp ]; then 
+      ALTITUDE_MM=$( tail -c 5 /data/ftp/internal_000/Disco/academy/*.pud.temp | hexdump -e '1/4 "%6d" 1/1 "%3d" "\n"' | awk '{ print $1 }' )
+      ALTITUDE=$(echo "$ALTITUDE_MM 1000 / p" | /data/ftp/internal_000/lte/bin/dc)
+      echo $ALTITUDE > /tmp/altitude
+  fi
+  sleep 2
+done
+
+exit 0

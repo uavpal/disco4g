@@ -1,0 +1,12 @@
+#!/bin/sh
+
+LTE_SIGNAL="N/A"
+echo $LTE_SIGNAL > /tmp/hilink-signal 
+
+while true; do
+    LTE_SIGNAL=$( /data/ftp/internal_000/lte/bin/hilink-status | awk '/signal:/ { print $2 }' ) 
+    echo $LTE_SIGNAL > /tmp/hilink-signal
+    sleep 10
+done
+
+exit 0
