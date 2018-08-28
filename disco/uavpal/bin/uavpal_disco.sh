@@ -130,6 +130,5 @@ if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 		fi
 	done
 fi
-ulogger -s -t uavpal_disco "... looping to keep script alive. ugly, yes!"
 ulogger -s -t uavpal_disco "*** idle on LTE ***"
 
