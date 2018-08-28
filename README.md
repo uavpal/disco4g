@@ -80,7 +80,7 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation).
 
 ## How to fly on 4G/LTE? (User Manual)
-Please see Wiki article [How to fly on 4G/LTE? (User Manual)](https://github.com/uavpal/disco4g/wiki/How-to-fly-on-4G-LTE%3F-(User-Manual)).
+Please see Wiki article [How to fly on 4G/LTE? (User Manual)](https://github.com/uavpal/disco4g/wiki/How-to-fly-on-4G-LTE-(User-Manual)).
 
 ## FAQ
 Please see Wiki article [FAQ](https://github.com/uavpal/disco4g/wiki/FAQ).
