@@ -1,1 +1,1 @@
-ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/data/ftp/uavpal/bin/uavpal_disco.sh"
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_disco /data/ftp/uavpal/bin/uavpal_disco.sh"

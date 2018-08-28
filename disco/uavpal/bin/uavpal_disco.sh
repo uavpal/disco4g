@@ -1,10 +1,4 @@
 #!/bin/sh
-for pid in $(pidof uavpal_disco.sh); do
-	if [ $pid != $$ ]; then
-		ulogger -s -t uavpal_disco "... script is already running with PID $pid (exiting!)"
-		exit 1
-	  fi
-done
 
 ulogger -s -t uavpal_disco "Huawei USB device detected"
 ulogger -s -t uavpal_disco "=== Enabling LTE ==="
@@ -138,4 +132,4 @@ if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 fi
 ulogger -s -t uavpal_disco "... looping to keep script alive. ugly, yes!"
 ulogger -s -t uavpal_disco "*** idle on LTE ***"
-while true; do sleep 10; done
+
