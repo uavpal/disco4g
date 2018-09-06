@@ -16,7 +16,7 @@ killall -9 curl
 killall -9 chat
 killall -9 pppd
 
-ulogger -s -t uavpal_bebop2 "... removing lock files"
+ulogger -s -t uavpal_disco "... removing lock files"
 rm /tmp/lock/uavpal_disco
 rm /tmp/lock/uavpal_unload
 
