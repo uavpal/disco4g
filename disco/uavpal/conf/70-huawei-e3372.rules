@@ -1,2 +1,2 @@
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_disco /data/ftp/uavpal/bin/uavpal_disco.sh"
-ACTION=="remove", SUBSYSTEM=="block", ENV{JUBA_U32_VENDOR}=="000012d1", RUN+="/data/ftp/uavpal/bin/uavpal_unload.sh"
+ACTION=="remove", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_unload /data/ftp/uavpal/bin/uavpal_unload.sh"

@@ -1,4 +1,10 @@
 #!/bin/sh
+
+usbmodeswitchStatus=`ps |grep usb_modeswitch |grep -v grep |wc -l`
+if [ $usbmodeswitchStatus -ne 0 ]; then
+	exit 0  # ignoring "removal" event while usb_modesswitch is running
+fi
+
 ulogger -s -t uavpal_disco "Huawei USB device disconnected"
 ulogger -s -t uavpal_disco "... unloading scripts and daemons"
 killall -9 uavpal_disco.sh
@@ -10,8 +16,9 @@ killall -9 curl
 killall -9 chat
 killall -9 pppd
 
-ulogger -s -t uavpal_disco "... removing lock file"
+ulogger -s -t uavpal_bebop2 "... removing lock files"
 rm /tmp/lock/uavpal_disco
+rm /tmp/lock/uavpal_unload
 
 ulogger -s -t uavpal_disco "... unloading kernel modules"
 rmmod bsd_comp
