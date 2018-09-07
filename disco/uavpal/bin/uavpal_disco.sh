@@ -100,15 +100,27 @@ ulogger -s -t uavpal_disco "... setting DNS servers statically (to Google)"
 echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
 
 ulogger -s -t uavpal_disco "... waiting for Internet connection"
-while true; do
-	if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-		ulogger -s -t uavpal_disco "... Internet connection is up"
-		break # break out of loop
+check=1
+until ping -c 1 f.root-servers.org. >/dev/null 2>&1; do
+	if [ $check -ge 100 ]; then
+		ulogger -s -t uavpal_disco "... No Internet connection after 100 tries, exiting."
+		exit 1
 	fi
+	(( ++check ))
 done
+ulogger -s -t uavpal_disco "... Internet connection is up"
 
-ulogger -s -t uavpal_disco "... setting date/time using ntp"
-ntpd -n -d -q
+ulogger -s -t uavpal_disco "... getting date/time using GPS"
+gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
+while [ "$gps_nmea_out" == "" ]; do
+	ulogger -s -t uavpal_disco "... ERROR no GPS signal - trying again in 3s"
+	sleep 3
+	gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
+done
+gps_date=$(echo $gps_nmea_out | cut -d ',' -f 8)
+gps_time=$(echo $gps_nmea_out | cut -d ',' -f 2)
+date +%d%m%y%H%M%S -s $gps_date$gps_time
+ulogger -s -t uavpal_disco "... got GPS signal date/time are set to GMT"
 
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh $huawei_mode &
