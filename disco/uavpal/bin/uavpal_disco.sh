@@ -111,7 +111,7 @@ until ping -c 1 -W 3 f.root-servers.org. >/dev/null 2>&1; do
 done
 ulogger -s -t uavpal_disco "... Internet connection is up"
 
-ntp_request=$(printf "c%47s"|nc -uw1 pool.ntp.org 123|xxd -s40 -l4 -p)
+check=1
 until ntp_request=$(printf "c%47s" 2>/dev/null |nc -uw1 pool.ntp.org 123 2>/dev/null |xxd -s40 -l4 -p 2>/dev/null); do
 	if [ $check -ge 30 ]; then
 		echo "... No NTP connection after 30 tries, exiting."
