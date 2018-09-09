@@ -101,26 +101,28 @@ echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
 
 ulogger -s -t uavpal_disco "... waiting for Internet connection"
 check=1
-until ping -c 1 f.root-servers.org. >/dev/null 2>&1; do
-	if [ $check -ge 100 ]; then
-		ulogger -s -t uavpal_disco "... No Internet connection after 100 tries, exiting."
+until ping -c 1 -W 3 f.root-servers.org. >/dev/null 2>&1; do
+	if [ $check -ge 30 ]; then
+		ulogger -s -t uavpal_disco "... No Internet connection after 30 tries, exiting."
 		exit 1
 	fi
+	sleep 1
 	(( ++check ))
 done
 ulogger -s -t uavpal_disco "... Internet connection is up"
 
-ulogger -s -t uavpal_disco "... getting date/time using GPS"
-gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
-while [ "$gps_nmea_out" == "" ]; do
-	ulogger -s -t uavpal_disco "... ERROR no GPS signal - trying again in 3s"
-	sleep 3
-	gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
+ntp_request=$(printf "c%47s"|nc -uw1 pool.ntp.org 123|xxd -s40 -l4 -p)
+until ntp_request=$(printf "c%47s" 2>/dev/null |nc -uw1 pool.ntp.org 123 2>/dev/null |xxd -s40 -l4 -p 2>/dev/null); do
+	if [ $check -ge 30 ]; then
+		echo "... No NTP connection after 30 tries, exiting."
+		exit 1
+	fi
+	sleep 1
+	(( ++check ))
 done
-gps_date=$(echo $gps_nmea_out | cut -d ',' -f 8)
-gps_time=$(echo $gps_nmea_out | cut -d ',' -f 2)
-date +%d%m%y%H%M%S -s $gps_date$gps_time
-ulogger -s -t uavpal_disco "... got GPS signal date/time are set to GMT"
+ntp_date=$((0x${ntp_request}-2208988800))
+ulogger -s -t uavpal_disco "... setting date/time to ${ntp_date} using NTP"
+date -r$ntp_date
 
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh $huawei_mode &
