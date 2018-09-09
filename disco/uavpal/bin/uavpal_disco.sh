@@ -111,18 +111,9 @@ until ping -c 1 -W 3 f.root-servers.org. >/dev/null 2>&1; do
 done
 ulogger -s -t uavpal_disco "... Internet connection is up"
 
-check=1
-until ntp_request=$(printf "c%47s" 2>/dev/null |nc -uw1 pool.ntp.org 123 2>/dev/null |xxd -s40 -l4 -p 2>/dev/null); do
-	if [ $check -ge 30 ]; then
-		echo "... No NTP connection after 30 tries, exiting."
-		exit 1
-	fi
-	sleep 1
-	(( ++check ))
-done
-ntp_date=$((0x${ntp_request}-2208988800))
-ulogger -s -t uavpal_disco "... setting date/time to ${ntp_date} using NTP"
-date -r$ntp_date
+ulogger -s -t uavpal_disco "... getting date/time using ntp"
+ntpd -n -d -q # will block until time is acquired
+ulogger -s -t uavpal_disco "... date/time set"
 
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh $huawei_mode &
