@@ -69,10 +69,10 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 *<a name="supportedhw">Successfully tested using:</a>*
 - Mobile tethering device: iPhone X (iOS 11.3+)
 - 4G/LTE USB Modem: Huawei E3372s-153, E3372h-153, E3372h-510, E3372h-607
-- USB-connected device with FreeFlight Pro App: iPad Pro (iOS 11.3), iPhone X (iOS 11.3)
+- USB-connected device with FreeFlight Pro App: iOS 11 - 12, most Android devices
 - Parrot Disco, Firmware 1.4.1, 1.7.0, 1.7.1
 - Parrot Skycontroller 2, Firmware 1.0.7
-- FreeFlight Pro 5.2.0 on iOS
+- FreeFlight Pro 5.2.0 - 5.2.2 on iOS and Android
 
 [Drop us a note](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, so we can keep this list updated.
 
