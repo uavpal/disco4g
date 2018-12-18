@@ -21,16 +21,10 @@ rm /tmp/lock/uavpal_disco
 rm /tmp/lock/uavpal_unload
 
 ulogger -s -t uavpal_disco "... unloading kernel modules"
-rmmod bsd_comp
-rmmod ppp_deflate
-rmmod ppp_async
-rmmod ppp_generic
-rmmod slhc
-rmmod crc-ccitt
-#rmmod xt_tcpudp
-#rmmod iptable_filter
-#rmmod ip_tables
-#rmmod x_tables
+rmmod xt_tcpudp
+rmmod iptable_filter
+rmmod ip_tables
+rmmod x_tables
 rmmod option
 rmmod usb_wwan
 rmmod usbserial

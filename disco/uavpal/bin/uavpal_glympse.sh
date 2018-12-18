@@ -62,8 +62,8 @@ title="${droneName}'s GPS location"
 
 phone_no=`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`
 if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
-	ulogger -s -t uavpal_glympse "... calling uavpal_sms"
-	/data/ftp/uavpal/bin/uavpal_sms.sh $1 "$phone_no" "$message"
+	ulogger -s -t uavpal_sms "... sending SMS with Glympse link"
+	echo -e "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" > /dev/ttyUSB2
 fi
 
 pb_access_token=`head -1 /data/ftp/uavpal/conf/pushbullet |tr -d '\r\n' |tr -d '\n'`
@@ -72,24 +72,90 @@ if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
 	/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$title"'", "body": "'"$message"'"}'
 fi
 
-ulogger -s -t uavpal_glympse "... Glympse API: setting identifier to Disco ID"
-/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneName}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
-
 ulogger -s -t uavpal_glympse "... Glympse API: setting Disco thumbnail image"
 /data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"avatar\", \"v\": \"https://uavpal.com/img/disco.png?$(date +%s)\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
 
 ulogger -s -t uavpal_glympse "... Glympse API: reading out Disco's GPS coordinates every 5 seconds to update Glympse via API"
 while true
 do
-   gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
-   lat=$(echo $gps_nmea_out | cut -d ',' -f 4)
-   latdir=$(echo $gps_nmea_out | cut -d ',' -f 5)
-   long=$(echo $gps_nmea_out | cut -d ',' -f 6)
-   longdir=$(echo $gps_nmea_out | cut -d ',' -f 7)
-   speed=$(echo $gps_nmea_out | cut -d ',' -f 8)
-   # speed is not working. fix in future release.
-   # /data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),0$(/data/ftp/dc -e "$speed 0.514444 * p")]]" "https://api.glympse.com/v2/tickets/$ticket/append_location"
-   /data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),0]]" "https://api.glympse.com/v2/tickets/$ticket/append_location"
-   sleep 5
+	gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
+	lat=$(echo $gps_nmea_out | cut -d ',' -f 4)
+	latdir=$(echo $gps_nmea_out | cut -d ',' -f 5)
+	long=$(echo $gps_nmea_out | cut -d ',' -f 6)
+	longdir=$(echo $gps_nmea_out | cut -d ',' -f 7)
+	speed=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $gps_nmea_out | cut -d ',' -f 8) 51.4444 * p"))
+	heading="$(printf "%.0f\n" $(echo $gps_nmea_out | cut -d ',' -f 9))"
+	altitude_abs=$(grep GNGNS -m 1 /tmp/gps_nmea_out | cut -c4- | cut -d ',' -f 10)
+
+	if [ -f /data/ftp/internal_000/Disco/academy/*.pud.temp ]; then
+		altitude_rel=$(/data/ftp/uavpal/bin/dc -e "$altitude_abs $(cat /tmp/alt_before_takeoff) - p")
+	else
+		echo $altitude_abs > /tmp/alt_before_takeoff
+		altitude_rel="0"
+  fi
+
+	if [ `cat /tmp/sc2ping | wc -l` -eq '1' ]; then
+		latency=$(/data/ftp/uavpal/bin/dc -e "$(cat /tmp/sc2ping) 2 / p")
+	else
+		latency="n/a "
+	fi
+	bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
+	bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
+	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
+	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
+
+	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
+	if [ `echo $ip_sc2 | awk -F. '{print $1"."$2"."$3}'` == "192.168.42" ]; then
+		signal="Wi-Fi"
+	else
+		# reading out the modem's connection type
+		while true; do
+			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/mode
+			if grep "SYSINFOEX:" /tmp/mode >/dev/null; then
+				break # break out of loop
+			fi
+		done
+		modeString=`grep "SYSINFOEX:" /tmp/mode |tail -n 1`
+		modeNumeric=`echo $modeString | cut -d "," -f 8`
+		if [ $modeNumeric -ge 101 ]; then
+			mode="4G"
+		elif [ $modeNumeric -ge 23 ] && [ $modeNumeric -le 65 ]; then
+			mode="3G"
+		elif [ $modeNumeric -ge 1 ] && [ $modeNumeric -le 3 ]; then
+			mode="2G"
+		else
+			mode="n/a"
+		fi
+
+		# reading out the modem's signal strength
+		while true; do
+			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/signal
+			if grep "CSQ:" /tmp/signal >/dev/null; then
+				break # break out of loop
+			fi
+		done
+		signalString=`grep "CSQ:" /tmp/signal |tail -n 1`
+		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
+		signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.33 * p"))%
+		signal="$mode/$signalPercentage"
+	fi
+
+	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}ms)"
+
+### DEBUG ####
+ulogger -s -t uavpal_glympse "$droneLabel"
+echo
+
+	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),$speed,$heading]]" "https://api.glympse.com/v2/tickets/$ticket/append_location" &
+	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneLabel}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data" &
+
+	if test -n "$ip_sc2"; then
+		ping -c 1 $ip_sc2 |grep 'bytes from' | cut -d '=' -f 4 | tr -d ' ms' > /tmp/sc2ping &
+	else
+		rm /tmp/sc2ping 2>/dev/null
+	fi
+	sleep 5
+	# make sure all curl processes have ended
+	while ps |grep curl |grep -v grep >/dev/null; do usleep 100000; done
 done
 

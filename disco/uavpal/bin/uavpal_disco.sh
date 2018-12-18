@@ -15,7 +15,7 @@ ulogger -s -t uavpal_disco "... detected Disco firmware version ${disco_fw_versi
 ulogger -s -t uavpal_disco "... loading tunnel kernel module (for zerotier)"
 insmod /data/ftp/uavpal/mod/${kernel_mods}/tun.ko
 
-ulogger -s -t uavpal_disco "... loading E3372 firmware 21.x kernel modules (required for detection)"
+ulogger -s -t uavpal_disco "... loading USB modem kernel modules"
 insmod /data/ftp/uavpal/mod/${kernel_mods}/usbserial.ko 
 insmod /data/ftp/uavpal/mod/${kernel_mods}/usb_wwan.ko
 insmod /data/ftp/uavpal/mod/${kernel_mods}/option.ko
@@ -26,78 +26,45 @@ insmod /data/ftp/uavpal/mod/${kernel_mods}/ip_tables.ko                 # needed
 insmod /data/ftp/uavpal/mod/${kernel_mods}/iptable_filter.ko            # needed for firmware <=1.4.1 and >=1.7.0
 insmod /data/ftp/uavpal/mod/${kernel_mods}/xt_tcpudp.ko                 # needed for firmware <=1.4.1 only
 
-# Security: block incoming connections on the Internet interfaces (ppp* for E3372 firmware 21.x and eth1 for firmware 22.x)
+# Security: block incoming connections on the Internet interface
 # these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt*)
 ulogger -s -t uavpal_disco "... applying iptables security rules"
-if_block='ppp+ eth1'
-for i in $if_block
-do
-	iptables -I INPUT -p tcp -i $i --dport 21 -j DROP      # inetd (ftp:/data/ftp)
-	iptables -I INPUT -p tcp -i $i --dport 23 -j DROP      # telnet
-	iptables -I INPUT -p tcp -i $i --dport 51 -j DROP      # inetd (ftp:/update)
-	iptables -I INPUT -p tcp -i $i --dport 61 -j DROP      # inetd (ftp:/data/ftp/internal_000/flightplans)
-	iptables -I INPUT -p tcp -i $i --dport 873 -j DROP     # rsync
-	iptables -I INPUT -p tcp -i $i --dport 8888 -j DROP    # dragon-prog
-	iptables -I INPUT -p tcp -i $i --dport 9050 -j DROP    # adb
-	iptables -I INPUT -p tcp -i $i --dport 44444 -j DROP   # dragon-prog
-	iptables -I INPUT -p udp -i $i --dport 67 -j DROP      # dnsmasq
-	iptables -I INPUT -p udp -i $i --dport 5353 -j DROP    # avahi-daemon
-	iptables -I INPUT -p udp -i $i --dport 14551 -j DROP   # dragon-prog
+ip_block='21 23 51 61 873 8888 9050 44444 67 5353 14551'
+for i in $ip_block; do iptables -I INPUT -p tcp -i usb0 --dport $i -j DROP; done
+
+ulogger -s -t uavpal_disco "... running usb_modeswitch to switch Huawei modem into ncm mode"
+/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --huawei-alt-mode -s 3
+
+until [ -d "/proc/sys/net/ipv4/conf/usb0" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
+ulogger -s -t uavpal_disco "... detected Huawei USB modem in ncm mode"
+
+ulogger -s -t uavpal_disco "... connecting modem to Internet"
+echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+until ifconfig usb0 |grep "inet addr" >/dev/null; do usleep 100000; done
+
+ulogger -s -t uavpal_disco "... requesting DHCP info"
+while true; do
+	/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^DHCP?' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/dhcp
+	if grep "DHCP:" /tmp/dhcp >/dev/null; then
+		break # break out of loop
+	fi
 done
 
-ulogger -s -t uavpal_disco "... running usb_modeswitch"
-/data/ftp/uavpal/bin/usb_modeswitch -J -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` -s 3
+dhcpString=`grep "DHCP:" /tmp/dhcp |tail -n 1`
 
-ulogger -s -t uavpal_disco "... trying to detect 4G USB modem"
-while true
-do
-	# -=-=-=-=-= Hi-Link Mode =-=-=-=-=-
-	if [ -d "/proc/sys/net/ipv4/conf/eth1" ]; then
-		huawei_mode="hilink"
-		ulogger -s -t uavpal_disco "... detected Huawei USB modem in Hi-Link mode"
-		ulogger -s -t uavpal_disco "... unloading E3372 firmware 21.x kernel modules (not required as Hi-Link was detected)"
-		rmmod option
-		rmmod usb_wwan
-		rmmod usbserial
-		ulogger -s -t uavpal_disco "... bringing up Hi-Link network interface"
-		ifconfig eth1 up
-		ulogger -s -t uavpal_disco "... requesting IP address from modem's DHCP server"
-		hilink_ip=`udhcpc -i eth1 -n -t 10 2>&1 |grep obtained | awk '{ print $4 }'`
-		hilink_router_ip=$(echo `echo $hilink_ip | cut -d '.' -f 1,2,3`.1)
-		ulogger -s -t uavpal_disco "... setting IP and route"
-		ifconfig eth1 ${hilink_ip} netmask 255.255.255.0
-		ip route add default via ${hilink_router_ip} dev eth1
-		ulogger -s -t uavpal_disco "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
-		sessionInfo=`/data/ftp/uavpal/bin/curl -s -X GET "http://${hilink_router_ip}/api/webserver/SesTokInfo"`
-		cookie=`echo "$sessionInfo" | grep "SessionID=" | cut -b 10-147`
-		token=`echo "$sessionInfo" | grep "TokInfo" | cut -b 10-41`
-		/data/ftp/uavpal/bin/curl -s -X POST "http://${hilink_router_ip}/api/security/dmz" -d "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token"
-		ulogger -s -t uavpal_disco "... starting hilink script to inform SC2 of drone's WAN IP"
-		/data/ftp/uavpal/bin/uavpal_hilink.sh ${hilink_router_ip} &
-		break 1 # break out of while loop
-	fi
+function hex2dec() {
+	tmpHex=`echo $dhcpString |cut -f $1 -d ',' |cut -f 2 -d ' '`
+	echo `printf "%d\n" 0x${tmpHex:6:2}`.`printf "%d\n" 0x${tmpHex:4:2}`.`printf "%d\n" 0x${tmpHex:2:2}`.`printf "%d\n" 0x${tmpHex:0:2}`
+}
 
-	# -=-=-=-=-= Stick Mode =-=-=-=-=-
-	if [ -c "/dev/ttyUSB0" ]; then
-		huawei_mode="stick"
-		ulogger -s -t uavpal_disco "... detected Huawei USB modem in Stick mode"
-		ulogger -s -t uavpal_disco "... loading ppp kernel modules"
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/crc-ccitt.ko
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/slhc.ko
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_generic.ko
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_async.ko
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_deflate.ko
-		insmod /data/ftp/uavpal/mod/${kernel_mods}/bsd_comp.ko
-		ulogger -s -t uavpal_disco "... running pppd to connect to LTE network"
-		LD_PRELOAD=/data/ftp/uavpal/lib/libpam.so.0:/data/ftp/uavpal/lib/libpcap.so.0.8:/data/ftp/uavpal/lib/libaudit.so.1 /data/ftp/uavpal/bin/pppd call lte
-		break 1 # break out of while loop
-	fi
-	sleep 1
-done
+# ifconfig usb0 $(hex2dec 1) netmask $(hex2dec 2)
+ulogger -s -t uavpal_disco "... setting default gateway"
+ip route add default via $(hex2dec 3) dev usb0
 
-ulogger -s -t uavpal_disco "... setting DNS servers statically (to Google)"
-echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
+ulogger -s -t uavpal_disco "... setting DNS servers"
+echo nameserver $(hex2dec 5) >/etc/resolv.conf
+echo nameserver $(hex2dec 6) >>/etc/resolv.conf
 
 ulogger -s -t uavpal_disco "... waiting for Internet connection"
 while true; do
@@ -111,7 +78,7 @@ ulogger -s -t uavpal_disco "... setting date/time using ntp"
 ntpd -n -d -q
 
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
-/data/ftp/uavpal/bin/uavpal_glympse.sh $huawei_mode &
+/data/ftp/uavpal/bin/uavpal_glympse.sh  &
 
 ulogger -s -t uavpal_disco "... starting zerotier daemon"
 /data/ftp/uavpal/bin/zerotier-one -d
