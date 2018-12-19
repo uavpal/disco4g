@@ -1,7 +1,7 @@
 #!/bin/sh
 {
 ulogger -s -t uavpal_disco "Huawei USB device detected"
-ulogger -s -t uavpal_disco "=== Enabling LTE ==="
+ulogger -s -t uavpal_disco "=== Loading uavpal softmod $(head -1 /data/ftp/uavpal/version.txt |tr -d '\r\n' |tr -d '\n') ==="
 
 disco_fw_version=`grep ro.parrot.build.uid /etc/build.prop | cut -d '-' -f 3`
 disco_fw_version_numeric=${disco_fw_version//.}
