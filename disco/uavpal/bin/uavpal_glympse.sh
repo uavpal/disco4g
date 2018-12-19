@@ -75,6 +75,8 @@ fi
 ulogger -s -t uavpal_glympse "... Glympse API: setting Disco thumbnail image"
 /data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"avatar\", \"v\": \"https://uavpal.com/img/disco.png?$(date +%s)\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
 
+ztVersion=$(/data/ftp/uavpal/bin/zerotier-one -v)
+
 ulogger -s -t uavpal_glympse "... Glympse API: reading out Disco's GPS coordinates every 5 seconds to update Glympse via API"
 while true
 do
@@ -95,9 +97,9 @@ do
   fi
 
 	if [ `cat /tmp/sc2ping | wc -l` -eq '1' ]; then
-		latency=$(/data/ftp/uavpal/bin/dc -e "$(cat /tmp/sc2ping) 2 / p")
+		latency=$(/data/ftp/uavpal/bin/dc -e "$(cat /tmp/sc2ping) 2 / p")ms
 	else
-		latency="n/a "
+		latency="n/a"
 	fi
 	bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
 	bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
@@ -105,9 +107,18 @@ do
 	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
 
 	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
+	ztConn=""
 	if [ `echo $ip_sc2 | awk -F. '{print $1"."$2"."$3}'` == "192.168.42" ]; then
 		signal="Wi-Fi"
 	else
+		# detect if zerotier connection is direct vs. relayed
+		if [ $(/data/ftp/uavpal/bin/zerotier-one -q listpeers |grep LEAF |grep $ztVersion |grep -v ' - ' | wc -l) != '0' ] && [ "$ip_sc2" != "" ]; then
+			ztConn=" [D]"
+		fi
+		if [ $(/data/ftp/uavpal/bin/zerotier-one -q listpeers |grep LEAF |grep $ztVersion |grep -v ' - ' | wc -l) == '0' ] && [ "$ip_sc2" != "" ]; then
+			ztConn=" [R]"
+		fi
+
 		# reading out the modem's connection type
 		while true; do
 			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/mode
@@ -140,7 +151,7 @@ do
 		signal="$mode/$signalPercentage"
 	fi
 
-	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}ms)"
+	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}${ztConn})"
 
 ### DEBUG ####
 ulogger -s -t uavpal_glympse "$droneLabel"
