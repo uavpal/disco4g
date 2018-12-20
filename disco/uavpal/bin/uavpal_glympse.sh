@@ -148,7 +148,7 @@ do
 		signalString=`grep "CSQ:" /tmp/signal |tail -n 1`
 		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
 		if [ "$signalRSSI" == "99" ]; then signalRSSI=0; fi
-		signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.33 * p"))%
+		signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.23 * p"))%
 		signal="$mode/$signalPercentage"
 	fi
 
@@ -156,7 +156,6 @@ do
 
 ### DEBUG ####
 ulogger -s -t uavpal_glympse "$droneLabel"
-echo
 
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),$speed,$heading]]" "https://api.glympse.com/v2/tickets/$ticket/append_location" &
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneLabel}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data" &

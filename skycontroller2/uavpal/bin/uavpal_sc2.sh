@@ -3,17 +3,18 @@ main()
 {
 	# variables
 	wifi_connection_attempts=5
-	wifi_connection_timeout_seconds=7
+	wifi_connection_timeout_seconds=10
 	wifi_dhcp_timeout_seconds=10
 	zerotier_iface_timeout_seconds=5
-	disco4g_ping_retry=20
+	drone4g_ping_retry=20
 	settings_double_press_seconds=2
 
+	ulogger -s -t uavpal_sc2 "=== Loading uavpal softmod $(head -1 /data/lib/ftp/uavpal/version.txt |tr -d '\r\n' |tr -d '\n') ==="
 	# set tmp files values (cheap workaround for local variable scope issue in while loops)
 	echo wifi >/tmp/mode
 	echo 0 >/tmp/button_prev_timestamp
 
-	# background pinging of disco via zt*, change LED to blue if ping ok - needed to override green LED after a successful mppd reconnect
+	# background pinging of drone via zt*, change LED to blue if ping ok - needed to override green LED after a successful mppd reconnect
 	while true; do if ping -c 1 -I `head -1 /tmp/zt_interface` 192.168.42.1 >/dev/null 2>&1; then mpp_bb_cli on 3; fi; sleep 1; done &
 
 	# wait for mppd to be idle (to absorb the power button press from a cold start)
@@ -118,8 +119,10 @@ switch_to_lte()
 	ulogger -s -t uavpal_sc2 "... starting zerotier daemon"
 	/data/lib/ftp/uavpal/bin/zerotier-one -d
 
-	if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
+	if [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+		ulogger -s -t uavpal_sc2 "... zerotier config does not yet exist or network ID does not match zt_networkid config"
 		ulogger -s -t uavpal_sc2 "... (initial-)joining zerotier network ID"
+		rm -rf /data/lib/zerotier-one 2>/dev/null
 		while true
 		do
 			ztjoin_response=`/data/lib/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
@@ -135,29 +138,29 @@ switch_to_lte()
 
 	for p in `seq 1 $zerotier_iface_timeout_seconds`
 	do
-		zt_interface=`/data/lib/ftp/uavpal/bin/zerotier-one -q listnetworks -j |grep portDeviceName | cut -d '"' -f 4`
+		zt_interface=`/data/lib/ftp/uavpal/bin/zerotier-one -q listnetworks -j |grep portDeviceName |tail -n 1 |cut -d '"' -f 4`
 		if ip route add 192.168.42.1/32 dev $zt_interface; then
-			ulogger -s -t uavpal_sc2 "... added IP route for disco via zerotier interface $zt_interface successfully"
+			ulogger -s -t uavpal_sc2 "... added IP route for drone via zerotier interface $zt_interface successfully"
 			echo $zt_interface >/tmp/zt_interface
 			break # break out of loop
 		fi
 		sleep 1
 		if [ "$p" -eq "$zerotier_iface_timeout_seconds" ]; then
-			ulogger -s -t uavpal_sc2 "... zerotier IP route for disco could not be set - most probably due to zerotier daemon not bringing up the network interface zt* within $zerotier_iface_timeout_seconds seconds - switching back to Wi-Fi"
+			ulogger -s -t uavpal_sc2 "... zerotier IP route for drone could not be set - most probably due to zerotier daemon not bringing up the network interface zt* within $zerotier_iface_timeout_seconds seconds - switching back to Wi-Fi"
 			switch_to_wifi
 			return # back to main()
 		fi
 	done
 
-	for p in `seq 1 $disco4g_ping_retry`
+	for p in `seq 1 $drone4g_ping_retry`
 	do
-		ulogger -s -t uavpal_sc2 "... trying to ping disco via 4G/LTE through zerotier (try $p of $disco4g_ping_retry)"
+		ulogger -s -t uavpal_sc2 "... trying to ping drone via 4G/LTE through zerotier (try $p of $drone4g_ping_retry)"
 		if ping -c 1 -I $zt_interface 192.168.42.1 >/dev/null 2>&1; then
-			ulogger -s -t uavpal_sc2 "... successfully received ping echo from disco via zerotier over 4G/LTE"
+			ulogger -s -t uavpal_sc2 "... successfully received ping echo from drone via zerotier over 4G/LTE"
 			break # break out of loop
 		fi
-		if [ "$p" -eq "$disco4g_ping_retry" ]; then
-			ulogger -s -t uavpal_sc2 "... could not ping disco via zerotier over 4G/LTE in $disco4g_ping_retry attempts - switching back to Wi-Fi"
+		if [ "$p" -eq "$drone4g_ping_retry" ]; then
+			ulogger -s -t uavpal_sc2 "... could not ping drone via zerotier over 4G/LTE in $drone4g_ping_retry attempts - switching back to Wi-Fi"
 			switch_to_wifi
 			return # back to main()
 		fi
@@ -184,7 +187,7 @@ switch_to_wifi()
 	ulogger -s -t uavpal_sc2 "... terminating processes required for LTE"
 	killall zerotier-one
 	killall udhcpc
-	ulogger -s -t uavpal_sc2 "*** idle on Disco Wifi (or at least trying to connect) ***"
+	ulogger -s -t uavpal_sc2 "*** idle on Drone Wifi (or at least trying to connect) ***"
 }
 
 main "$@"
