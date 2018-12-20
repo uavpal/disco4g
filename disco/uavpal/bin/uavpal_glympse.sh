@@ -147,6 +147,7 @@ do
 		done
 		signalString=`grep "CSQ:" /tmp/signal |tail -n 1`
 		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
+		if [ "$signalRSSI" == "99" ]; then signalRSSI=0; fi
 		signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.33 * p"))%
 		signal="$mode/$signalPercentage"
 	fi
