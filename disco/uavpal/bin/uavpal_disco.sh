@@ -83,8 +83,10 @@ ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 ulogger -s -t uavpal_disco "... starting zerotier daemon"
 /data/ftp/uavpal/bin/zerotier-one -d
 
-if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
+if [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+	ulogger -s -t uavpal_disco "... zerotier config does not yet exist or network ID does not match zt_networkid config"
 	ulogger -s -t uavpal_disco "... (initial-)joining zerotier network ID"
+	rm -rf /data/lib/zerotier-one 2>/dev/null
 	while true
 	do
 		ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
