@@ -1,5 +1,9 @@
 #!/bin/sh
 {
+
+# variables
+initial_connection_timeout_seconds=20
+	
 ulogger -s -t uavpal_disco "Huawei USB device detected"
 ulogger -s -t uavpal_disco "=== Loading uavpal softmod $(head -1 /data/ftp/uavpal/version.txt |tr -d '\r\n' |tr -d '\n') ==="
 
@@ -38,11 +42,21 @@ ulogger -s -t uavpal_disco "... running usb_modeswitch to switch Huawei modem in
 until [ -d "/proc/sys/net/ipv4/conf/usb0" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
 ulogger -s -t uavpal_disco "... detected Huawei USB modem in ncm mode"
 
-ulogger -s -t uavpal_disco "... connecting modem to Internet"
+while true; do
+ulogger -s -t uavpal_disco "... connecting modem to mobile network"
 echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-until ifconfig usb0 |grep "inet addr" >/dev/null; do usleep 100000; done
-#### TODO: add timeout into until, do hangup and re-dial again !!!
+	for p in `seq 1 $initial_connection_timeout_seconds`
+	do
+		if (ifconfig usb0 2>&1 |grep "inet addr" >/dev/null); then
+			break 2 # break out of both loops
+		fi
+		sleep 1
+	done
+ulogger -s -t uavpal_disco "... connection could not be acquired, starting over"
+echo -ne "AT^RESET\r\n" > /dev/ttyUSB2
+sleep 5
+done
 
 ulogger -s -t uavpal_disco "... requesting DHCP info"
 while true; do
@@ -67,10 +81,10 @@ ulogger -s -t uavpal_disco "... setting DNS servers"
 echo nameserver $(hex2dec 5) >/etc/resolv.conf
 echo nameserver $(hex2dec 6) >>/etc/resolv.conf
 
-ulogger -s -t uavpal_disco "... waiting for Internet connection"
+ulogger -s -t uavpal_disco "... waiting for public Internet connection"
 while true; do
 	if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-		ulogger -s -t uavpal_disco "... Internet connection is up"
+		ulogger -s -t uavpal_disco "... public Internet connection is up"
 		break # break out of loop
 	fi
 done

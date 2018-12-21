@@ -104,7 +104,9 @@ do
 	bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
 	bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
 	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
+	bat_percent_prev=bat_percent
 	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
+	if [ -z "$bat_percent" ]; then bat_percent="$bat_percent_prev"; fi
 
 	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
 	ztConn=""
