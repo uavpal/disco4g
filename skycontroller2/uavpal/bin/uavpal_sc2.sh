@@ -116,13 +116,16 @@ switch_to_lte()
 	ulogger -s -t uavpal_sc2 "... terminating process wifid-uavpal"
 	kill -9 `ps |grep wifid |grep suffix |awk '{print $1}'`
 
+	if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+		ulogger -s -t uavpal_sc2 "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
+		rm -rf /data/lib/zerotier-one 2>/dev/null
+	fi
+
 	ulogger -s -t uavpal_sc2 "... starting zerotier daemon"
 	/data/lib/ftp/uavpal/bin/zerotier-one -d
 
-	if [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
-		ulogger -s -t uavpal_sc2 "... zerotier config does not yet exist or network ID does not match zt_networkid config"
+	if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 		ulogger -s -t uavpal_sc2 "... (initial-)joining zerotier network ID"
-		rm -rf /data/lib/zerotier-one 2>/dev/null
 		while true
 		do
 			ztjoin_response=`/data/lib/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`

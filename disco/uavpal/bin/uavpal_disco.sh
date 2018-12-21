@@ -42,6 +42,7 @@ ulogger -s -t uavpal_disco "... connecting modem to Internet"
 echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 until ifconfig usb0 |grep "inet addr" >/dev/null; do usleep 100000; done
+#### TODO: add timeout into until, do hangup and re-dial again !!!
 
 ulogger -s -t uavpal_disco "... requesting DHCP info"
 while true; do
@@ -80,13 +81,16 @@ ntpd -n -d -q
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh  &
 
+if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+	ulogger -s -t uavpal_disco "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
+	rm -rf /data/lib/zerotier-one 2>/dev/null
+fi
+
 ulogger -s -t uavpal_disco "... starting zerotier daemon"
 /data/ftp/uavpal/bin/zerotier-one -d
 
-if [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
-	ulogger -s -t uavpal_disco "... zerotier config does not yet exist or network ID does not match zt_networkid config"
+if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 	ulogger -s -t uavpal_disco "... (initial-)joining zerotier network ID"
-	rm -rf /data/lib/zerotier-one 2>/dev/null
 	while true
 	do
 		ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
