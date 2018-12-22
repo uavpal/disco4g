@@ -148,7 +148,7 @@ do
 	fi
 
 	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}${ztConn})"
-	ulogger -s -t uavpal_glympse "... updating Glymse label: $droneLabel"
+	ulogger -s -t uavpal_glympse "... updating Glympse label: $droneLabel"
 
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),$speed,$heading]]" "https://api.glympse.com/v2/tickets/$ticket/append_location" &
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneLabel}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data" &
