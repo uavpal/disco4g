@@ -78,6 +78,7 @@ ulogger -s -t uavpal_glympse "... Glympse API: setting Disco thumbnail image"
 ztVersion=$(/data/ftp/uavpal/bin/zerotier-one -v)
 
 ulogger -s -t uavpal_glympse "... Glympse API: reading out Disco's GPS coordinates every 5 seconds to update Glympse via API"
+
 while true
 do
 	gps_nmea_out=$(grep GNRMC -m 1 /tmp/gps_nmea_out | cut -c4-)
@@ -104,7 +105,7 @@ do
 	bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
 	bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
 	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
-	bat_percent_prev=bat_percent
+	bat_percent_prev=$bat_percent
 	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
 	if [ -z "$bat_percent" ]; then bat_percent="$bat_percent_prev"; fi
 
@@ -122,42 +123,32 @@ do
 		fi
 
 		# reading out the modem's connection type
-		while true; do
-			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/mode
-			if grep "SYSINFOEX:" /tmp/mode >/dev/null; then
-				break # break out of loop
-			fi
-		done
-		modeString=`grep "SYSINFOEX:" /tmp/mode |tail -n 1`
-		modeNumeric=`echo $modeString | cut -d "," -f 8`
-		if [ $modeNumeric -ge 101 ]; then
+		modeString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "SYSINFOEX:" |tail -n 1`
+		modeNum=`echo $modeString | cut -d "," -f 8`
+		if [ $modeNum -ge 101 ]; then
 			mode="4G"
-		elif [ $modeNumeric -ge 23 ] && [ $modeNumeric -le 65 ]; then
+		elif [ $modeNum -ge 23 ] && [ $modeNum -le 65 ]; then
 			mode="3G"
-		elif [ $modeNumeric -ge 1 ] && [ $modeNumeric -le 3 ]; then
+		elif [ $modeNum -ge 1 ] && [ $modeNum -le 3 ]; then
 			mode="2G"
 		else
 			mode="n/a"
 		fi
 
 		# reading out the modem's signal strength
-		while true; do
-			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/signal
-			if grep "CSQ:" /tmp/signal >/dev/null; then
-				break # break out of loop
-			fi
-		done
-		signalString=`grep "CSQ:" /tmp/signal |tail -n 1`
+		signalString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CSQ:" |tail -n 1`
 		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
-		if [ "$signalRSSI" == "99" ]; then signalRSSI=0; fi
-		signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.23 * p"))%
+		if [ $signalRSSI -ge 0 ] && [ $signalRSSI -le 31 ]; then
+			signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.23 * p"))%
+		else # including 99 for "Unknown or undetectable"
+			signalPercentage="n/a"
+		fi
+
 		signal="$mode/$signalPercentage"
 	fi
 
 	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}${ztConn})"
-
-### DEBUG ####
-ulogger -s -t uavpal_glympse "$droneLabel"
+	ulogger -s -t uavpal_glympse "... updating Glymse label: $droneLabel"
 
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[[$(date +%s)000,$(gpsDecimal $lat $latdir),$(gpsDecimal $long $longdir),$speed,$heading]]" "https://api.glympse.com/v2/tickets/$ticket/append_location" &
 	/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"name\", \"v\": \"${droneLabel}\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data" &

@@ -43,7 +43,7 @@ until [ -d "/proc/sys/net/ipv4/conf/usb0" ] && [ -c "/dev/ttyUSB0" ]; do usleep 
 ulogger -s -t uavpal_disco "... detected Huawei USB modem in ncm mode"
 
 while true; do
-ulogger -s -t uavpal_disco "... connecting modem to mobile network"
+ulogger -s -t uavpal_disco "... establishing connection to mobile network"
 echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 	for p in `seq 1 $initial_connection_timeout_seconds`
@@ -58,15 +58,14 @@ echo -ne "AT^RESET\r\n" > /dev/ttyUSB2
 sleep 5
 done
 
+stty -echo -F /dev/ttyUSB2
 ulogger -s -t uavpal_disco "... requesting DHCP info"
 while true; do
-	/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^DHCP?' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>/tmp/dhcp
-	if grep "DHCP:" /tmp/dhcp >/dev/null; then
+	dhcpString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^DHCP?' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "DHCP:" |tail -n 1`
+	if [ ! -z "$dhcpString" ]; then
 		break # break out of loop
 	fi
 done
-
-dhcpString=`grep "DHCP:" /tmp/dhcp |tail -n 1`
 
 function hex2dec() {
 	tmpHex=`echo $dhcpString |cut -f $1 -d ',' |cut -f 2 -d ' '`
