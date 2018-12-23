@@ -6,7 +6,7 @@ do
 	echo "Trying to connect from Disco to Skycontroller 2 via Wi-Fi"
 done
 echo "Copying softmod files from Disco to Skycontroller 2"
-/data/ftp/uavpal/bin/adb push /tmp/disco4g/skycontroller2/uavpal /data/lib/ftp/uavpal/ 2>/dev/null
+until /data/ftp/uavpal/bin/adb push /tmp/disco4g/skycontroller2/uavpal /data/lib/ftp/uavpal/ 2>/dev/null; do echo "Error while copying files to Skycontroller 2, trying again"; done
 echo "Making binaries and scripts executable"
 /data/ftp/uavpal/bin/adb shell "chmod +x /data/lib/ftp/uavpal/bin/*" 2> /dev/null
 echo "Remounting filesystem as read/write"
