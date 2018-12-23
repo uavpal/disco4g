@@ -54,7 +54,7 @@ echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr 
 		sleep 1
 	done
 ulogger -s -t uavpal_disco "... connection could not be acquired, starting over"
-echo -ne "AT^RESET\r\n" > /dev/ttyUSB2
+/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --reset-usb
 sleep 5
 done
 
