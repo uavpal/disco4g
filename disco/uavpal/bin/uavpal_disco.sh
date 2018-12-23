@@ -42,43 +42,30 @@ ulogger -s -t uavpal_disco "... running usb_modeswitch to switch Huawei modem in
 until [ -d "/proc/sys/net/ipv4/conf/usb0" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
 ulogger -s -t uavpal_disco "... detected Huawei USB modem in ncm mode"
 
-while true; do
-ulogger -s -t uavpal_disco "... establishing connection to mobile network"
-echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-	for p in `seq 1 $initial_connection_timeout_seconds`
-	do
-		if (ifconfig usb0 2>&1 |grep "inet addr" >/dev/null); then
-			break 2 # break out of both loops
-		fi
-		sleep 1
-	done
-ulogger -s -t uavpal_disco "... connection could not be acquired, starting over"
-/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --reset-usb
-sleep 5
-done
-
 stty -echo -F /dev/ttyUSB2
-ulogger -s -t uavpal_disco "... requesting DHCP info"
 while true; do
-	dhcpString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^DHCP?' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "DHCP:" |tail -n 1`
-	if [ ! -z "$dhcpString" ]; then
-		break # break out of loop
-	fi
+	ulogger -s -t uavpal_disco "... establishing connection to mobile network"
+	echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+	echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+		for p in `seq 1 $initial_connection_timeout_seconds`
+		do
+			pdpParameters=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CGCONTRDP' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CGCONTRDP:" |tail -n 1`
+			if [ ! -z "$pdpParameters" ]; then
+				break 2 # break out of both loops
+			fi
+			sleep 1
+		done
+	ulogger -s -t uavpal_disco "... connection could not be acquired, starting over"
+	/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --reset-usb
+	/data/ftp/uavpal/bin/uavpal_unload.sh
 done
 
-function hex2dec() {
-	tmpHex=`echo $dhcpString |cut -f $1 -d ',' |cut -f 2 -d ' '`
-	echo `printf "%d\n" 0x${tmpHex:6:2}`.`printf "%d\n" 0x${tmpHex:4:2}`.`printf "%d\n" 0x${tmpHex:2:2}`.`printf "%d\n" 0x${tmpHex:0:2}`
-}
-
-# ifconfig usb0 $(hex2dec 1) netmask $(hex2dec 2)
-ulogger -s -t uavpal_disco "... setting default gateway"
-ip route add default via $(hex2dec 3) dev usb0
-
-ulogger -s -t uavpal_disco "... setting DNS servers"
-echo nameserver $(hex2dec 5) >/etc/resolv.conf
-echo nameserver $(hex2dec 6) >>/etc/resolv.conf
+ulogger -s -t uavpal_disco "... setting IP, default gateway and DNS"
+ifconfig usb0 $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $1"."$2"."$3"."$4}')
+ifconfig usb0 netmask $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $5"."$6"."$7"."$8}')
+ip route add default via $(echo "${pdpParameters//\"}" | cut -d',' -f5) dev usb0
+echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f6) >/etc/resolv.conf
+echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f7) >>/etc/resolv.conf
 
 ulogger -s -t uavpal_disco "... waiting for public Internet connection"
 while true; do
