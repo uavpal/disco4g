@@ -139,7 +139,7 @@ do
 		signalString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CSQ:" |tail -n 1`
 		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
 		if [ $signalRSSI -ge 0 ] && [ $signalRSSI -le 31 ]; then
-			signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 3.23 * p"))%
+			signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 1 + 3.13 * p"))%
 		else # including 99 for "Unknown or undetectable"
 			signalPercentage="n/a"
 		fi
