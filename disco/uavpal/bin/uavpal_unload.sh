@@ -9,6 +9,7 @@ ulogger -s -t uavpal_disco "Huawei USB device disconnected"
 ulogger -s -t uavpal_disco "... unloading scripts and daemons"
 killall -9 uavpal_disco.sh
 killall -9 uavpal_glympse.sh
+killall -9 uavpal_connmgr.sh
 killall -9 zerotier-one
 killall -9 udhcpc
 killall -9 curl

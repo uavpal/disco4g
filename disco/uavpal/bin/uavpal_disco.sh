@@ -42,30 +42,8 @@ ulogger -s -t uavpal_disco "... running usb_modeswitch to switch Huawei modem in
 until [ -d "/proc/sys/net/ipv4/conf/usb0" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
 ulogger -s -t uavpal_disco "... detected Huawei USB modem in ncm mode"
 
-stty -echo -F /dev/ttyUSB2
-while true; do
-	ulogger -s -t uavpal_disco "... establishing connection to mobile network"
-	echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-	echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-		for p in `seq 1 $initial_connection_timeout_seconds`
-		do
-			pdpParameters=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CGCONTRDP' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CGCONTRDP:" |tail -n 1`
-			if [ ! -z "$pdpParameters" ]; then
-				break 2 # break out of both loops
-			fi
-			sleep 1
-		done
-	ulogger -s -t uavpal_disco "... connection could not be acquired, starting over"
-	/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --reset-usb
-	/data/ftp/uavpal/bin/uavpal_unload.sh
-done
-
-ulogger -s -t uavpal_disco "... setting IP, default gateway and DNS"
-ifconfig usb0 $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $1"."$2"."$3"."$4}')
-ifconfig usb0 netmask $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $5"."$6"."$7"."$8}')
-ip route add default via $(echo "${pdpParameters//\"}" | cut -d',' -f5) dev usb0
-echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f6) >/etc/resolv.conf
-echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f7) >>/etc/resolv.conf
+ulogger -s -t uavpal_disco "... starting connection manager script"
+/data/ftp/uavpal/bin/uavpal_connmgr.sh &
 
 ulogger -s -t uavpal_disco "... waiting for public Internet connection"
 while true; do
@@ -79,7 +57,7 @@ ulogger -s -t uavpal_disco "... setting date/time using ntp"
 ntpd -n -d -q
 
 ulogger -s -t uavpal_disco "... starting glympse script for GPS tracking"
-/data/ftp/uavpal/bin/uavpal_glympse.sh  &
+/data/ftp/uavpal/bin/uavpal_glympse.sh &
 
 if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
 	ulogger -s -t uavpal_disco "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
