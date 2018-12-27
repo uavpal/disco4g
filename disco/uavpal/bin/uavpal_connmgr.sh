@@ -3,9 +3,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
 
 # variables
 connection_setup_timeout_seconds=20
-ping_retries=20
+ping_retries_per_destination=2
 first_run="true"
-ping_destinations="8.8.8.8 f.root-servers.org" 
+ping_destinations="8.8.8.8 192.5.5.241 199.7.83.42" # google-public-dns-a.google.com, f.root-servers.org, l.root-servers.org
 
 connect()
 {
@@ -35,8 +35,8 @@ connect()
 check_connection()
 {
 	for check in $ping_destinations; do
-		for i in $(seq 1 $ping_retries); do
-			ping -c 1 $check >/dev/null 2>&1
+		for i in $(seq 1 $ping_retries_per_destination); do
+			ping -W 5 -c 1 $check >/dev/null 2>&1
 			if [ $? -eq 0 ]; then
 				return 0
 			fi
