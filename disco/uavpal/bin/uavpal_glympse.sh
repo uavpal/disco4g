@@ -29,14 +29,17 @@ function gpsDecimal()
 	echo $gpsDec
 }
 
+platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
+
+
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="`head -1 /data/ftp/uavpal/conf/glympse_apikey |tr -d '\r\n' |tr -d '\n'`"
 	if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
-		ulogger -s -t uavpal_disco "... disabling Glympse, API key set to ignore"
+		ulogger -s -t uavpal_glympe "... disabling Glympse, API key set to ignore"
 		exit 0
 	fi
 
-ulogger -s -t uavpal_glympse "... reading Disco ID from avahi"
+ulogger -s -t uavpal_glympse "... reading drone ID from avahi"
 droneName=$(cat /tmp/avahi/services/ardiscovery.service |grep name |cut -d '>' -f 2 |cut -d '<' -f 0)
 
 ulogger -s -t uavpal_glympse "... Glympse API: creating account"
@@ -57,6 +60,8 @@ ticket=$(parse_json $glympseCreateTicket id)
 ulogger -s -t uavpal_glympse "... Glympse API: creating invite"
 glympseCreateInvite=$(/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST "https://api.glympse.com/v2/tickets/$ticket/create_invite?type=sms&address=1234567890&send=client")
 
+ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
+
 message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
 title="${droneName}'s GPS location"
 
@@ -72,12 +77,19 @@ if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
 	/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$title"'", "body": "'"$message"'"}'
 fi
 
-ulogger -s -t uavpal_glympse "... Glympse API: setting Disco thumbnail image"
-/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"avatar\", \"v\": \"https://uavpal.com/img/disco.png?$(date +%s)\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
+ulogger -s -t uavpal_glympse "... Glympse API: setting drone thumbnail image"
+if [ "$platform" == "evinrude" ]; then
+	# Parrot Disco
+	tn_filename="disco.png"
+elif [ "$platform" == "ardrone3" ]; then
+	# Parrot Bebop 2
+	tn_filename="bebop2.png"
+fi
+/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST -d "[{\"t\": $(date +%s)000, \"pid\": 0, \"n\": \"avatar\", \"v\": \"https://uavpal.com/img/${tn_filename}?$(date +%s)\"}]" "https://api.glympse.com/v2/tickets/$ticket/append_data"
 
 ztVersion=$(/data/ftp/uavpal/bin/zerotier-one -v)
 
-ulogger -s -t uavpal_glympse "... Glympse API: reading out Disco's GPS coordinates every 5 seconds to update Glympse via API"
+ulogger -s -t uavpal_glympse "... Glympse API: reading out drone's GPS coordinates every 5 seconds to update Glympse via API"
 
 while true
 do
@@ -90,7 +102,7 @@ do
 	heading="$(printf "%.0f\n" $(echo $gps_nmea_out | cut -d ',' -f 9))"
 	altitude_abs=$(grep GNGNS -m 1 /tmp/gps_nmea_out | cut -c4- | cut -d ',' -f 10)
 
-	if [ -f /data/ftp/internal_000/Disco/academy/*.pud.temp ]; then
+	if [ -f /data/ftp/internal_000/*/academy/*.pud.temp ]; then
 		altitude_rel=$(/data/ftp/uavpal/bin/dc -e "$altitude_abs $(cat /tmp/alt_before_takeoff) - p")
 	else
 		echo $altitude_abs > /tmp/alt_before_takeoff
@@ -102,8 +114,16 @@ do
 	else
 		latency="n/a"
 	fi
-	bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
-	bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
+
+	if [ "$platform" == "evinrude" ]; then
+		# Parrot Disco
+		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
+		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
+	elif [ "$platform" == "ardrone3" ]; then
+		# Parrot Bebop 2
+		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 10); done
+		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 11); done
+	fi
 	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
 	bat_percent_prev=$bat_percent
 	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
