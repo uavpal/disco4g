@@ -35,7 +35,7 @@ platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="`head -1 /data/ftp/uavpal/conf/glympse_apikey |tr -d '\r\n' |tr -d '\n'`"
 	if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
-		ulogger -s -t uavpal_glympe "... disabling Glympse, API key set to ignore"
+		ulogger -s -t uavpal_glymspe "... disabling Glympse, API key set to ignore"
 		exit 0
 	fi
 
