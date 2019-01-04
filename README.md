@@ -1,3 +1,4 @@
+![UAVPAL Logo](https://uavpal.com/img/uavpal-logo-461px.png)
 # Parrot Disco over 4G/LTE (softmod)
 
 ## About
