@@ -4,7 +4,7 @@
 # variables
 initial_connection_timeout_seconds=20
 
-ulogger -s -t uavpal_drone "Huawei USB device detected"
+ulogger -s -t uavpal_drone "Huawei USB device detected (USB ID: $(lsusb |grep 12d1 |head -n 1 | cut -d ' ' -f 6))"
 ulogger -s -t uavpal_drone "=== Loading uavpal softmod $(head -1 /data/ftp/uavpal/version.txt |tr -d '\r\n' |tr -d '\n') ==="
 	
 # set platform, evinrude=Disco, ardrone3=Bebop 2
@@ -56,7 +56,7 @@ ulogger -s -t uavpal_drone "... running usb_modeswitch to switch Huawei modem in
 /data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --huawei-alt-mode -s 3
 
 until [ -d "/proc/sys/net/ipv4/conf/${ncm_usb_if}" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
-ulogger -s -t uavpal_drone "... detected Huawei USB modem in ncm mode"
+ulogger -s -t uavpal_drone "... detected Huawei USB modem in ncm mode (USB ID: $(lsusb |grep 12d1 |head -n 1 | cut -d ' ' -f 6))"
 
 ulogger -s -t uavpal_drone "... starting connection manager script"
 /data/ftp/uavpal/bin/uavpal_connmgr.sh ${ncm_usb_if} &
