@@ -70,7 +70,7 @@ while true; do
 done
 
 ulogger -s -t uavpal_drone "... setting date/time using ntp"
-ntpd -n -d -q
+ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool.ntp.org -p 3.debian.pool.ntp.org
 
 ulogger -s -t uavpal_drone "... starting glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh &
