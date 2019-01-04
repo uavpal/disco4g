@@ -1,3 +1,4 @@
+<a name="top">![UAVPAL Logo](https://uavpal.com/img/uavpal-logo-461px.png)</a>
 # Parrot Disco over 4G/LTE (softmod)
 
 ## About
@@ -53,7 +54,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 ## Requirements
 *Hardware:*
 - Parrot Disco drone
-- Parrot Skycontroller 2 (Skycontroller 2P with the black joysticks is in [Beta](https://github.com/uavpal/disco4g/issues/18#issuecomment-402980602))
+- Parrot Skycontroller 2 (Skycontroller 2P with the black joysticks is in [Beta](https://uavpal.com/disco/faq#beta))
 - [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and SIM card\
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional, but recommended)
