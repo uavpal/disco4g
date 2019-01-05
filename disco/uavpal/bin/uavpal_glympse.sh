@@ -124,7 +124,11 @@ do
 		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 10); done
 		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 11); done
 	fi
+	bat_volts_prev=$bat_volts
 	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
+	# skip battery voltage (use previous value) if it's higher than 13.5V - sometimes unrealistic values are returned by i2cdump
+	if [ "$(echo $bat_volts | awk '{print int($1+0.5)}')" -gt "13" ]; then bat_volts="$bat_volts_prev"; fi
+	
 	bat_percent_prev=$bat_percent
 	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
 	if [ -z "$bat_percent" ]; then bat_percent="$bat_percent_prev"; fi
