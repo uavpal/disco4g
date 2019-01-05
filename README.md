@@ -21,6 +21,12 @@ Cons:
 - Might incur mobile data cost (dependent on your mobile network operator)
 - Slightly higher latency as compared to Wi-Fi
 
+## Community
+[![UAVPAL Slack Workspace](https://uavpal.com/img/slack.png)](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ)
+
+Instructions too technical? Having trouble installing the softmod? Questions on what hardware to order? Want to meet the developers? Interested in other mods (batteries, LEDs, etc.)? Interested to meet like-minded people? Having a great idea and want to let us know?\
+We have a great and very active community on Slack, come [join us](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ)!
+
 ## Why?
 - The Parrot Disco's stock Wi-Fi loses video signal way before the specified 2 km.
 - Because we can :grin:
