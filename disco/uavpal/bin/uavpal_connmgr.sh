@@ -16,13 +16,17 @@ connect()
 	for p in `seq 1 $connection_setup_timeout_seconds`; do
 		pdpParameters=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CGCONTRDP' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CGCONTRDP:" |tail -n 1`
 		if [ ! -z "$pdpParameters" ]; then
-			ulogger -s -t uavpal_connmgr "... setting IP, default gateway and DNS"
-			ifconfig $1 $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $1"."$2"."$3"."$4}')
-			ifconfig $1 netmask $(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $5"."$6"."$7"."$8}')
+			ip=$(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $1"."$2"."$3"."$4}')
+			netmask=$(echo "${pdpParameters//\"}" | cut -d',' -f4 | awk -F'.' '{print $5"."$6"."$7"."$8}')
+			gateway=$(echo "${pdpParameters//\"}" | cut -d',' -f5)
+			dns1=$(echo "${pdpParameters//\"}" | cut -d',' -f6)
+			dns2=$(echo "${pdpParameters//\"}" | cut -d',' -f7)
+			ulogger -s -t uavpal_connmgr "... setting IP ($ip), netmask ($netmask), default gateway ($gateway) and DNS (${dns1}$(if [ "$dns2" != "" ]; then echo ", $dns2"; fi))"
+			ifconfig $1 $ip netmask $netmask
 			ip route del default
-			ip route add default via $(echo "${pdpParameters//\"}" | cut -d',' -f5) dev $1
-			echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f6) >/etc/resolv.conf
-			echo nameserver $(echo "${pdpParameters//\"}" | cut -d',' -f7) >>/etc/resolv.conf
+			ip route add default via $gateway dev $1
+			echo nameserver $dns1 >/etc/resolv.conf
+			if [ "$dns2" != "" ]; then echo nameserver $dns2 >>/etc/resolv.conf; fi
 			break # break out of loop
 		elif [ $p == $connection_setup_timeout_seconds ]; then
 			ulogger -s -t uavpal_connmgr "... no IP address received while trying to establishing connection, disconnecting now"
