@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "=== Uninstalling Disco4G on Disco ==="
+echo "=== Uninstalling UAVPAL softmod on Disco ==="
 echo "Remounting filesystem as read/write"
 mount -o remount,rw /
 echo "Removing ppp directory including symlink for ppp-lte settings"

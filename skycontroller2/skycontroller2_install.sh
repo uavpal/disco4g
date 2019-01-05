@@ -1,12 +1,21 @@
 #!/bin/sh
-echo "=== Installing Disco4G on Skycontroller 2 ==="
-ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
-until /data/ftp/uavpal/bin/adb connect ${ip_sc2}:9050 2>/dev/null;
-do
-	echo "Trying to connect from Disco to Skycontroller 2 via Wi-Fi"
+echo "=== Installing UAVPAL softmod on Skycontroller 2 ==="
+until [ "$ip_sc2" != "" ]; do
+	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
+	echo "Trying to detect Skycontroller 2 (ensure Skycontroller 2 is turned on and its power LED is green)"
+	sleep 1
 done
-echo "Copying softmod files from Disco to Skycontroller 2"
-until /data/ftp/uavpal/bin/adb push /tmp/disco4g/skycontroller2/uavpal /data/lib/ftp/uavpal/ 2>/dev/null; do echo "Error while copying files to Skycontroller 2, trying again"; done
+
+/data/ftp/uavpal/bin/adb start-server 2>/dev/null
+
+echo "Trying to connect to Skycontroller 2 ($ip_sc2) via adb"
+until [ $(/data/ftp/uavpal/bin/adb connect ${ip_sc2}:9050 2>/dev/null | grep 'connected to' | wc -l) -ge "1" ]; do
+	echo "not successful, trying again"
+	sleep 1
+done
+echo "Successfully connected to Skycontroller 2!"
+echo "Copying softmod files from drone to Skycontroller 2"
+until /data/ftp/uavpal/bin/adb push /tmp/*4g/skycontroller2/uavpal /data/lib/ftp/uavpal/ 2>/dev/null; do echo "Error while copying files to Skycontroller 2, trying again"; done
 echo "Making binaries and scripts executable"
 /data/ftp/uavpal/bin/adb shell "chmod +x /data/lib/ftp/uavpal/bin/*" 2> /dev/null
 echo "Remounting filesystem as read/write"
