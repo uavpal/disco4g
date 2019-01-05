@@ -21,6 +21,12 @@ Cons:
 - Might incur mobile data cost (dependent on your mobile network operator)
 - Slightly higher latency as compared to Wi-Fi
 
+## Community
+[![UAVPAL Slack Workspace](https://uavpal.com/img/slack.png)](https://uavpal.com/slack)
+
+Instructions too technical? Having trouble installing the softmod? Questions on what hardware to order? Want to meet the developers? Interested in other mods (batteries, LEDs, etc.)? Interested to meet like-minded people? Having a great idea and want to let us know?\
+We have a great and very active community on Slack, come [join us](https://uavpal.com/slack)!
+
 ## Why?
 - The Parrot Disco's stock Wi-Fi loses video signal way before the specified 2 km.
 - Because we can :grin:
@@ -99,7 +105,7 @@ If you insist, feel free to donate any amount you like. We will mainly use donat
 [![Donate using Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=GY3BTZPLPBB2W&lc=US&item_name=UAVPAL&cn=Add%20special%20instructions%3A&no_shipping=1&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted)
 
 ## Contact/Contribute
-Join our [UAVPAL Slack workspace](https://join.slack.com/t/uavpal/shared_invite/enQtMzQ4NDA5NzU0MDM5LTcyNjVjMjdkMDU4ODYwYjJmZjg1MWJmMWQwYzQyOTYzZDJiNTYwNzY3MzFiMjQ1NmIwYWE2YjQ0NzdkYWFiMGQ) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.\
+Join our [UAVPAL Slack workspace](https://uavpal.com/slack) or check out the [issue section](https://github.com/uavpal/disco4g/issues) here on GitHub.\
 Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (please do not use email for issues/troubleshooting help. Join our Slack community instead!)
 
 ## Special Thanks to
@@ -118,6 +124,6 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - Tim Vu
 
 ## Disclaimer
-This is still an EXPERIMENTAL modification, no thorough testing has been conducted! Mod and fly your Disco at YOUR OWN RISK!!!
+This is still an EXPERIMENTAL modification! Mod and fly your Disco at YOUR OWN RISK!!!
 
 
