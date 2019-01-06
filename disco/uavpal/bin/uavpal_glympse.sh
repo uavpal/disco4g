@@ -31,7 +31,6 @@ function gpsDecimal()
 
 platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
 
-
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="`head -1 /data/ftp/uavpal/conf/glympse_apikey |tr -d '\r\n' |tr -d '\n'`"
 	if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
@@ -90,6 +89,10 @@ fi
 ztVersion=$(/data/ftp/uavpal/bin/zerotier-one -v)
 
 ulogger -s -t uavpal_glympse "... Glympse API: reading out drone's GPS coordinates every 5 seconds to update Glympse via API"
+
+# initializing vars
+bat_volts="n/a"
+bat_percent="n/a"
 
 while true
 do
