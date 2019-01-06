@@ -78,6 +78,8 @@ ulogger -s -t uavpal_drone "... starting glympse script for GPS tracking"
 if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
 	ulogger -s -t uavpal_drone "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
 	rm -rf /data/lib/zerotier-one 2>/dev/null
+	mkdir -p /data/lib/zerotier-one
+	ln -s /data/ftp/uavpal/conf/local.conf /data/lib/zerotier-one/local.conf
 fi
 
 ulogger -s -t uavpal_drone "... starting zerotier daemon"
