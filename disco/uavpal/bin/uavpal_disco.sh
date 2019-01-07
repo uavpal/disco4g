@@ -14,10 +14,11 @@ drone_fw_version_numeric=${drone_fw_version//.}
 
 if [ "$platform" == "evinrude" ]; then
 	drone_alias="Parrot Disco"
-	ncm_usb_if="usb0"
 	if [ "$drone_fw_version_numeric" -ge "170" ]; then
+		ncm_usb_if="usb0"
 		kernel_mods="1.7.0"
 	else
+		ncm_usb_if="usb"
 		kernel_mods="1.4.1"
 	fi
 elif [ "$platform" == "ardrone3" ]; then
