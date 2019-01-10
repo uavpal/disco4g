@@ -53,7 +53,7 @@ Note: The mobile device running FreeFlight Pro (the one connected to Skycontroll
 
 [ZeroTier](https://zerotier.com) is a free online service, which we use to manage the connection between Disco and Skycontroller 2. This allows to do NAT traversal which is required due to the mobile tethering device and even some modems. Whether direct 4G/LTE-internal connections are allowed depends on your mobile network operator. ZeroTier allows to connect Skycontroller 2 to your Disco via an encrypted channel, regardless of the network topology.
 
-Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android allows independent real-time GPS tracking of the Disco via 4G/LTE. This can be particularly useful to recover the Disco in the unfortunate event of a crash or flyaway.
+Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android, allows independent real-time GPS tracking and detailed telemetry data (signal strength, altitude, speed, compass, battery and latency) of the Disco via 4G/LTE. This can be particularly useful to recover the Disco in the unfortunate event of a crash or flyaway.
 
 ![Glympse App showing Disco's location](https://image.ibb.co/kwt4bn/discoglympse.png)
 
@@ -65,7 +65,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional, but recommended)
 - USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended - order "direction up")
-- Mobile device/phone with Wi-Fi tethering and SIM card (for best performance, use the same operator as the USB modem's SIM card)
+- Mobile device/phone with Wi-Fi tethering and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings) (for best performance, use the same operator as the USB modem's SIM card)
 - PC with Wi-Fi (one-time, required for initial installation)
 
 *Software:*
