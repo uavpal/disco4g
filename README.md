@@ -61,7 +61,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 *Hardware:*
 - Parrot Disco drone
 - Parrot Skycontroller 2 (silver joysticks) or Skycontroller 2P (black joysticks)
-- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and SIM card\
+- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional, but recommended)
 - USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended - order "direction up")
