@@ -11,6 +11,7 @@ connect()
 {
 	ulogger -s -t uavpal_connmgr "... establishing connection to mobile network"
 	echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+	sleep 2
 	echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
 	# querying DHCP information
 	for p in `seq 1 $connection_setup_timeout_seconds`; do
