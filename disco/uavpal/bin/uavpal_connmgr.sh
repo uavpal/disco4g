@@ -9,9 +9,9 @@ ping_destinations="8.8.8.8 192.5.5.241 199.7.83.42" # google-public-dns-a.google
 
 connect()
 {
-	ulogger -s -t uavpal_connmgr "... establishing connection to mobile network"
-	echo -ne "AT+CGDCONT=1,\"IP\",\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
-	echo -ne "AT^NDISDUP=1,1,\"`head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`\"\r\n" > /dev/ttyUSB2
+	ulogger -s -t uavpal_connmgr "... establishing connection to mobile network using APN \"$(head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n')\""
+	/data/ftp/uavpal/bin/chat -V -t 1 '' "AT+CGDCONT=1,\"IP\",\"$(head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n')\"" 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
+	/data/ftp/uavpal/bin/chat -V -t 1 '' "AT\^NDISDUP=1,1,\"$(head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n')\"" 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
 	# querying DHCP information
 	for p in `seq 1 $connection_setup_timeout_seconds`; do
 		pdpParameters=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CGCONTRDP' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CGCONTRDP:" |tail -n 1`
@@ -30,7 +30,7 @@ connect()
 			break # break out of loop
 		elif [ $p == $connection_setup_timeout_seconds ]; then
 			ulogger -s -t uavpal_connmgr "... no IP address received while trying to establishing connection, disconnecting now"
-			echo -ne "AT^NDISDUP=1,0\r\n" > /dev/ttyUSB2
+			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^NDISDUP=1,0' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
 		fi
 		sleep 1
 	done
@@ -60,7 +60,7 @@ while true; do
 		check_connection
 		if [ $? -ne 0 ]; then
 			ulogger -s -t uavpal_connmgr "... modem disconnected, trying to reconnect"
-			echo -ne "AT^NDISDUP=1,0\r\n" > /dev/ttyUSB2
+			/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^NDISDUP=1,0' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
 			sleep 1
 			connect "$1"
 		fi

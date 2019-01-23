@@ -67,7 +67,7 @@ title="${droneName}'s GPS location"
 phone_no=`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`
 if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
 	ulogger -s -t uavpal_sms "... sending SMS with Glympse link"
-	echo -e "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" > /dev/ttyUSB2
+	/data/ftp/uavpal/bin/chat -V -t 1 '' "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
 fi
 
 pb_access_token=`head -1 /data/ftp/uavpal/conf/pushbullet |tr -d '\r\n' |tr -d '\n'`
