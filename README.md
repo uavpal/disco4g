@@ -59,7 +59,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 
 ## Requirements
 *Hardware:*
-- Parrot Disco drone
+- [Parrot Disco](https://www.parrot.com/us/drones/parrot-disco) / [Parrot Disco-Pro AG](https://www.parrot.com/business-solutions-us/parrot-professional/parrot-disco-pro-ag)
 - Parrot Skycontroller 2 (silver joysticks) or Skycontroller 2P (black joysticks)
 - [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
