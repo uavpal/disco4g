@@ -80,7 +80,7 @@ Note: there are different Huawei E3372 models available - please read [this FAQ 
 - Parrot Disco, Firmware 1.4.1, 1.7.0, 1.7.1
 - Parrot Skycontroller 2 (silver joysticks), Firmware 1.0.7 to 1.0.9
 - Parrot Skycontroller 2P (black joysticks), Firmware 1.0.3 to 1.0.5
-- FreeFlight Pro 5.2.0 - 5.2.2 on iOS and Android
+- FreeFlight Pro 5.2.0 - 5.2.3 on iOS and Android
 
 [Drop us a note](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, so we can keep this list updated.
 
