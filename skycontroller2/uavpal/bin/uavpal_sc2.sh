@@ -175,9 +175,6 @@ switch_to_lte()
 	if [ "$platform" == "mpp" ]; then
 		ulogger -s -t uavpal_sc2 "... pausing process wifid (mpp platform only)"
 		killall -SIGSTOP wifid
-	fi
-
-	if [ "$platform" == "mpp" ]; then
 		ulogger -s -t uavpal_sc2 "... launching process wifid-uavpal in the background (mpp platform only)"
 		WIFID_DRIVER=bcmdriver /usr/bin/wifid --mode STA --ip 192.168.42.3 --suffix uavpal &
 		wifid_suffix="--suffix uavpal"
