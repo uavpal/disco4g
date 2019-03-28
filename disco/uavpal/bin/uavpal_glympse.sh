@@ -1,5 +1,14 @@
 #!/bin/sh
+
+# exports
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
+
+# variables
+platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
+serial_ctrl_dev=`head -1 /tmp/serial_ctrl_dev |tr -d '\r\n' |tr -d '\n'`
+
+# functions
+. /data/ftp/uavpal/bin/uavpal_globalfunctions.sh
 
 function parse_json()
 {
@@ -29,12 +38,11 @@ function gpsDecimal()
 	echo $gpsDec
 }
 
-platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
-
+# main
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="`head -1 /data/ftp/uavpal/conf/glympse_apikey |tr -d '\r\n' |tr -d '\n'`"
 	if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
-		ulogger -s -t uavpal_glymspe "... disabling Glympse, API key set to ignore"
+		ulogger -s -t uavpal_glympse "... disabling Glympse, API key set to ignore"
 		exit 0
 	fi
 
@@ -66,8 +74,13 @@ title="${droneName}'s GPS location"
 
 phone_no=`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`
 if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
-	ulogger -s -t uavpal_sms "... sending SMS with Glympse link"
-	/data/ftp/uavpal/bin/chat -V -t 1 '' "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2 2>&1
+	if [ "$1" == "stick" ]; then
+		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via ${serial_ctrl_dev})"
+		/data/ftp/uavpal/bin/chat -V -t 2 '' "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev} 2>&1
+	elif [ "$1" == "hilink" ]; then
+		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via Hi-Link API)"
+		hilink_api "post" "/api/sms/send-sms" "<request><Index>-1</Index><Phones><Phone>${phone_no}</Phone></Phones><Sca></Sca><Content>${message}</Content><Length>-1</Length><Reserved>-1</Reserved><Date>-1</Date></request>"
+	fi
 fi
 
 pb_access_token=`head -1 /data/ftp/uavpal/conf/pushbullet |tr -d '\r\n' |tr -d '\n'`
@@ -149,8 +162,11 @@ do
 			ztConn=" [R]"
 		fi
 
+# TODO: add Hilink way
+###<supportmode>LTE|WCDMA|GSM</supportmode>
+###<workmode>LTE</workmode>
 		# reading out the modem's connection type
-		modeString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "SYSINFOEX:" |tail -n 1`
+		modeString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev}) 2>&1 |grep "SYSINFOEX:" |tail -n 1`
 		modeNum=`echo $modeString | cut -d "," -f 8`
 		if [ $modeNum -ge 101 ]; then
 			mode="4G"
@@ -162,8 +178,9 @@ do
 			mode="n/a"
 		fi
 
+# TODO: add Hilink way
 		# reading out the modem's signal strength
-		signalString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/ttyUSB2 < /dev/ttyUSB2) 2>&1 |grep "CSQ:" |tail -n 1`
+		signalString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev}) 2>&1 |grep "CSQ:" |tail -n 1`
 		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
 		if [ $signalRSSI -ge 0 ] && [ $signalRSSI -le 31 ]; then
 			signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 1 + 3.13 * p"))%

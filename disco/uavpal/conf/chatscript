@@ -1,0 +1,22 @@
+ABORT		BUSY
+ABORT		VOICE
+ABORT		"NO CARRIER"
+ABORT		"NO DIALTONE"
+ABORT		"NO DIAL TONE"
+ABORT		"NO ANSWER"
+ABORT		"DELAYED"
+ABORT		"ERROR"
+
+# cease if the modem is not attached to the network yet
+ABORT		"+CGATT: 0"
+
+""		AT
+TIMEOUT		12
+OK		ATH
+OK		ATE1
+
+OK		AT+CGDCONT=1,"IP","\T"
+OK		AT\^NDISDUP=1,1,"\T"
+OK		ATD*99#
+TIMEOUT		22
+CONNECT		""

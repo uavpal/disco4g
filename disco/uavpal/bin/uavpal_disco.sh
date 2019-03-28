@@ -1,12 +1,23 @@
 #!/bin/sh
 {
+# exports
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
 
 # variables
-initial_connection_timeout_seconds=20
+cdc_if="eth1"
+# TODO: make the following dynamic if possible
+ppp_if="ppp0"
+# TODO: make the following two dynamic (e.g. via AT^NDISDUP=1,0)
+serial_ctrl_dev="ttyUSB0"
+serial_ppp_dev="ttyUSB1"
 
+# functions
+. /data/ftp/uavpal/bin/uavpal_globalfunctions.sh
+
+# main
 ulogger -s -t uavpal_drone "Huawei USB device detected (USB ID: $(lsusb |grep 12d1 |head -n 1 | cut -d ' ' -f 6))"
 ulogger -s -t uavpal_drone "=== Loading uavpal softmod $(head -1 /data/ftp/uavpal/version.txt |tr -d '\r\n' |tr -d '\n') ==="
-	
+
 # set platform, evinrude=Disco, ardrone3=Bebop 2
 platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
 drone_fw_version=$(grep 'ro.parrot.build.uid' /etc/build.prop | cut -d '-' -f 3)
@@ -15,15 +26,12 @@ drone_fw_version_numeric=${drone_fw_version//.}
 if [ "$platform" == "evinrude" ]; then
 	drone_alias="Parrot Disco"
 	if [ "$drone_fw_version_numeric" -ge "170" ]; then
-		ncm_usb_if="usb0"
 		kernel_mods="1.7.0"
 	else
-		ncm_usb_if="usb"
 		kernel_mods="1.4.1"
 	fi
 elif [ "$platform" == "ardrone3" ]; then
 	drone_alias="Parrot Bebop 2"
-	ncm_usb_if="usb"
 	kernel_mods="4.4.2"
 else
 	ulogger -s -t uavpal_drone "... current platform ${platform} is not supported by the softmod - exiting!"
@@ -47,34 +55,68 @@ insmod /data/ftp/uavpal/mod/${kernel_mods}/ip_tables.ko                 # needed
 insmod /data/ftp/uavpal/mod/${kernel_mods}/iptable_filter.ko            # needed for Disco firmware <=1.4.1 and >=1.7.0 and Bebop 2 firmware >= 4.4.2
 insmod /data/ftp/uavpal/mod/${kernel_mods}/xt_tcpudp.ko                 # needed for Disco firmware <=1.4.1 only
 
-# Security: block incoming connections on the Internet interface
-# these connections should only be allowed on Wi-Fi (eth0) and via zerotier (zt*)
-ulogger -s -t uavpal_drone "... applying iptables security rules"
-ip_block='21 23 51 61 873 8888 9050 44444 67 5353 14551'
-for i in $ip_block; do iptables -I INPUT -p tcp -i ${ncm_usb_if} --dport $i -j DROP; done
+ulogger -s -t uavpal_drone "... running usb_modeswitch to switch Huawei modem into huawei-new-mode"
+/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --huawei-new-mode -s 3
 
-ulogger -s -t uavpal_drone "... running usb_modeswitch to switch Huawei modem into ncm mode"
-/data/ftp/uavpal/bin/usb_modeswitch -v 12d1 -p `lsusb |grep "ID 12d1" | cut -f 3 -d \:` --huawei-alt-mode -s 3
+ulogger -s -t uavpal_drone "... detecting Huawei modem type"
+while true
+do
+	# -=-=-=-=-= Hi-Link mode =-=-=-=-=-
+	if [ -d "/proc/sys/net/ipv4/conf/${cdc_if}" ]; then
+		huawei_mode="hilink"
+		ulogger -s -t uavpal_drone "... detected Huawei USB modem in Hi-Link mode"
+		ulogger -s -t uavpal_drone "... unloading Stick Mode kernel modules (not required for Hi-Link firmware)"
+		rmmod option
+		rmmod usb_wwan
+		rmmod usbserial
+		ulogger -s -t uavpal_drone "... connecting modem to Internet (Hi-Link)"
+		connect_hilink
+		firewall ${cdc_if}
+		ulogger -s -t uavpal_drone "... starting connection keep-alive handler in background"
+		connection_handler_hilink &
+		break 1 # break out of while loop
+		
+	fi
+	# -=-=-=-=-= Stick mode =-=-=-=-=-
+	if [ -c "/dev/${serial_ctrl_dev}" ]; then
+		huawei_mode="stick"
+		ulogger -s -t uavpal_drone "... detected Huawei USB modem in Stick mode"
+		ulogger -s -t uavpal_drone "... loading ppp kernel modules"
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/crc-ccitt.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/slhc.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_generic.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_async.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/ppp_deflate.ko
+		insmod /data/ftp/uavpal/mod/${kernel_mods}/bsd_comp.ko
+		ulogger -s -t uavpal_drone "... connecting modem to Internet (ppp)"
+		connect_stick
+		firewall ${ppp_if}
+		ulogger -s -t uavpal_drone "... starting connection keep-alive handler in background"
+		connection_handler_stick &
+		break 1 # break out of while loop
+	fi
+	usleep 100000
+done
 
-until [ -d "/proc/sys/net/ipv4/conf/${ncm_usb_if}" ] && [ -c "/dev/ttyUSB0" ]; do usleep 100000; done
-ulogger -s -t uavpal_drone "... detected Huawei USB modem in ncm mode (USB ID: $(lsusb |grep 12d1 |head -n 1 | cut -d ' ' -f 6))"
+###	ulogger -s -t uavpal_drone "... pushing config to SC2"
+###	/revamp old uavpal_hilink.sh script and start in background with paramter ${hilink_router_ip}
 
-ulogger -s -t uavpal_drone "... starting connection manager script"
-/data/ftp/uavpal/bin/uavpal_connmgr.sh ${ncm_usb_if} &
-
-ulogger -s -t uavpal_drone "... waiting for public Internet connection"
 while true; do
-	if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
-		ulogger -s -t uavpal_drone "... public Internet connection is up"
+	check_connection
+	if [ $? -eq 0 ]; then
 		break # break out of loop
 	fi
 done
+ulogger -s -t uavpal_drone "... public Internet connection is up"
+
+ulogger -s -t uavpal_drone "... setting DNS servers statically (Google Public DNS)"
+echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
 
 ulogger -s -t uavpal_drone "... setting date/time using ntp"
 ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool.ntp.org -p 3.debian.pool.ntp.org
 
-ulogger -s -t uavpal_drone "... starting glympse script for GPS tracking"
-/data/ftp/uavpal/bin/uavpal_glympse.sh &
+ulogger -s -t uavpal_drone "... starting Glympse script for GPS tracking"
+/data/ftp/uavpal/bin/uavpal_glympse.sh ${huawei_mode} &
 
 if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
 	ulogger -s -t uavpal_drone "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
