@@ -184,10 +184,19 @@ do
 			fi
 			signal="$mode/$signalPercentage"
 		elif [ "$1" == "hilink" ]; then
-			# TODO: add Hilink way for 3G vs. 4G and signal strength!
-			###<supportmode>LTE|WCDMA|GSM</supportmode>
-			###<workmode>LTE</workmode>
-			echo ###
+			modeStr=$(hilink_api "get" "/api/device/information" | xmllint --xpath 'string(//workmode)' -)
+			if [ "$modeStr" == "LTE" ]; then
+				mode="4G"
+			elif [ "$modeStr" == "WCDMA" ]; then
+				mode="3G"
+			elif [ "$modeStr" == "GSM" ]; then
+				mode="2G"
+			else
+				mode="n/a"
+			fi
+			signalBars=$(hilink_api "get" "/api/monitoring/status" | xmllint --xpath 'string(//SignalIcon)' -)
+			signalPercentage=$(echo "$signalBars 20 * p" | /data/ftp/uavpal/bin/dc)%
+			signal="$mode/$signalPercentage"
 		fi
 	fi
 
