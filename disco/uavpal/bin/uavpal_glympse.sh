@@ -40,11 +40,11 @@ function gpsDecimal()
 
 # main
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
-apikey="`head -1 /data/ftp/uavpal/conf/glympse_apikey |tr -d '\r\n' |tr -d '\n'`"
-	if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
-		ulogger -s -t uavpal_glympse "... disabling Glympse, API key set to ignore"
-		exit 0
-	fi
+apikey="$(conf_read glympse_apikey)"
+if [ "$apikey" == "AAAAAAAAAAAAAAAAAAAA" ]; then
+	ulogger -s -t uavpal_glympse "... disabling Glympse, API key set to ignore"
+	exit 0
+fi
 
 ulogger -s -t uavpal_glympse "... reading drone ID from avahi"
 droneName=$(cat /tmp/avahi/services/ardiscovery.service |grep name |cut -d '>' -f 2 |cut -d '<' -f 0)
@@ -72,18 +72,18 @@ ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(
 message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
 title="${droneName}'s GPS location"
 
-phone_no=`head -1 /data/ftp/uavpal/conf/phonenumber |tr -d '\r\n' |tr -d '\n'`
+phone_no="$(conf_read phonenumber)"
 if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
 	if [ "$1" == "stick" ]; then
 		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via ${serial_ctrl_dev})"
-		/data/ftp/uavpal/bin/chat -V -t 2 '' "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev} 2>&1
+		at_command "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" "OK" "2"
 	elif [ "$1" == "hilink" ]; then
 		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via Hi-Link API)"
 		hilink_api "post" "/api/sms/send-sms" "<request><Index>-1</Index><Phones><Phone>${phone_no}</Phone></Phones><Sca></Sca><Content>${message}</Content><Length>-1</Length><Reserved>-1</Reserved><Date>-1</Date></request>"
 	fi
 fi
 
-pb_access_token=`head -1 /data/ftp/uavpal/conf/pushbullet |tr -d '\r\n' |tr -d '\n'`
+pb_access_token="$(conf_read pushbullet)"
 if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
 	ulogger -s -t uavpal_glympse "... sending push notification"
 	/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$title"'", "body": "'"$message"'"}'
@@ -162,33 +162,33 @@ do
 			ztConn=" [R]"
 		fi
 
-# TODO: add Hilink way
-###<supportmode>LTE|WCDMA|GSM</supportmode>
-###<workmode>LTE</workmode>
-		# reading out the modem's connection type
-		modeString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT\^SYSINFOEX' 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev}) 2>&1 |grep "SYSINFOEX:" |tail -n 1`
-		modeNum=`echo $modeString | cut -d "," -f 8`
-		if [ $modeNum -ge 101 ]; then
-			mode="4G"
-		elif [ $modeNum -ge 23 ] && [ $modeNum -le 65 ]; then
-			mode="3G"
-		elif [ $modeNum -ge 1 ] && [ $modeNum -le 3 ]; then
-			mode="2G"
-		else
-			mode="n/a"
+		# reading out the modem's connection type and ignal strength
+		if [ "$1" == "stick" ]; then
+			modeString=$(at_command "AT\^SYSINFOEX" "OK" "1" | grep "SYSINFOEX:" | tail -n 1)
+			modeNum=`echo $modeString | cut -d "," -f 8`
+			if [ $modeNum -ge 101 ]; then
+				mode="4G"
+			elif [ $modeNum -ge 23 ] && [ $modeNum -le 65 ]; then
+				mode="3G"
+			elif [ $modeNum -ge 1 ] && [ $modeNum -le 3 ]; then
+				mode="2G"
+			else
+				mode="n/a"
+			fi
+			signalString=$(at_command "AT+CSQ" "OK" "1" | grep "CSQ:" | tail -n 1)
+			signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
+			if [ $signalRSSI -ge 0 ] && [ $signalRSSI -le 31 ]; then
+				signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 1 + 3.13 * p"))%
+			else # including 99 for "Unknown or undetectable"
+				signalPercentage="n/a"
+			fi
+			signal="$mode/$signalPercentage"
+		elif [ "$1" == "hilink" ]; then
+			# TODO: add Hilink way for 3G vs. 4G and signal strength!
+			###<supportmode>LTE|WCDMA|GSM</supportmode>
+			###<workmode>LTE</workmode>
+			echo ###
 		fi
-
-# TODO: add Hilink way
-		# reading out the modem's signal strength
-		signalString=`(/data/ftp/uavpal/bin/chat -V -t 1 '' 'AT+CSQ' 'OK' '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev}) 2>&1 |grep "CSQ:" |tail -n 1`
-		signalRSSI=`echo $signalString | awk '{print $2}' | cut -d ',' -f 1`
-		if [ $signalRSSI -ge 0 ] && [ $signalRSSI -le 31 ]; then
-			signalPercentage=$(printf "%.0f\n" $(/data/ftp/uavpal/bin/dc -e "$(echo $signalRSSI) 1 + 3.13 * p"))%
-		else # including 99 for "Unknown or undetectable"
-			signalPercentage="n/a"
-		fi
-
-		signal="$mode/$signalPercentage"
 	fi
 
 	droneLabel="${droneName} (Sig:${signal} Alt:${altitude_rel}m Bat:${bat_percent}%/${bat_volts}V Ltn:${latency}${ztConn})"

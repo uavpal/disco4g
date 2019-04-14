@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# functions
 change_led_color()
 {
 	case "$1" in
@@ -83,6 +84,12 @@ power_btn_listener()
 		fi
 
 	fi
+}
+
+conf_read()
+{
+	result=$(head -1 /data/lib/ftp/uavpal/conf/${1})
+	echo "$result" |tr -d '\r\n' |tr -d '\n'
 }
 
 main()
@@ -183,8 +190,8 @@ switch_to_lte()
 	fi
 
 	for p in `seq 1 $wifi_connection_attempts`; do
-		ulogger -s -t uavpal_sc2 "... connecting to mobile Wi-Fi hotspot (try $p of $wifi_connection_attempts)"
-		wifid-cli ${wifid_suffix} connect "`head -1 /data/lib/ftp/uavpal/conf/ssid |tr -d '\r\n' |tr -d '\n'`" 0 "`head -1 /data/lib/ftp/uavpal/conf/wpa |tr -d '\r\n' |tr -d '\n'`"
+		ulogger -s -t uavpal_sc2 "... connecting to mobile Wi-Fi hotspot \"$(conf_read ssid)\" (try $p of $wifi_connection_attempts)"
+		wifid-cli ${wifid_suffix} connect "$(conf_read ssid)" 0 "$(conf_read wpa)"
 
 		for q in `seq 1 $wifi_connection_timeout_seconds`; do
 			wifi_connection_status=`wifid-cli ${wifid_suffix} status 2>&1 |grep state |awk '{print $3}'`
@@ -238,7 +245,7 @@ switch_to_lte()
 		kill -9 `ps |grep wifid |grep suffix |awk '{print $1}'`
 	fi
 
-	if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+	if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(conf_read zt_networkid).conf" ]; then
 		ulogger -s -t uavpal_sc2 "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
 		rm -rf /data/lib/zerotier-one 2>/dev/null
 		mkdir -p /data/lib/zerotier-one
@@ -249,15 +256,15 @@ switch_to_lte()
 	/data/lib/ftp/uavpal/bin/zerotier-one -d 2>/tmp/zerotier-one_err
 
 	if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
-		ulogger -s -t uavpal_sc2 "... (initial-)joining zerotier network ID"
+		ulogger -s -t uavpal_sc2 "... (initial-)joining zerotier network ID $(conf_read zt_networkid)"
 		while true
 		do
-			ztjoin_response=`/data/lib/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/lib/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
+			ztjoin_response=`/data/lib/ftp/uavpal/bin/zerotier-one -q join $(conf_read zt_networkid)`
 			if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
-				ulogger -s -t uavpal_sc2 "... successfully joined zerotier network ID"
+				ulogger -s -t uavpal_sc2 "... successfully joined zerotier network ID $(conf_read zt_networkid)"
 				break # break out of loop
 			else
-				ulogger -s -t uavpal_sc2 "... ERROR joining zerotier network ID: $ztjoin_response - trying again"
+				ulogger -s -t uavpal_sc2 "... ERROR joining zerotier network ID $(conf_read zt_networkid): $ztjoin_response - trying again"
 				sleep 1
 			fi
 		done

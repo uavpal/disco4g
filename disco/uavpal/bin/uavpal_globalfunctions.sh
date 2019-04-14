@@ -20,7 +20,13 @@ hilink_api()
 	token=$(echo "$sessionInfo" | grep "TokInfo" | cut -b 10-41)
 	result=$(/data/ftp/uavpal/bin/curl -s -X $method "http://${hilink_router_ip}${url}" -d "$data" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token" 2>/dev/null)
 	if [ "$?" -ne "0" ]; then ulogger -s -t uavpal_hilink_api "... Error connecting to Hi-Link API"; fi
-	if echo "$result" | grep "<error>" ; then ulogger -s -t uavpal_hilink_api "... Hi-Link returned Error Code: $(echo $result | xmllint --xpath 'string(//error/code)' -)"; fi
+	if echo "$result" | grep "<error>" ; then
+		if [ "$(echo $result | xmllint --xpath 'string(//error/code)' -)" -eq "100003" ]; then
+			ulogger -s -t uavpal_hilink_api "... Hi-Link authentication error. Please disable password protection or set it to user=admin, password=admin"
+		else
+			ulogger -s -t uavpal_hilink_api "... Hi-Link returned Error Code: $(echo $result | xmllint --xpath 'string(//error/code)' -)"
+		fi
+	fi
 	echo "$result"
 }
 
@@ -31,6 +37,22 @@ firewall()
 	ulogger -s -t uavpal_drone "... applying iptables security rules for interface ${1}"
 	ip_block='21 23 51 61 873 8888 9050 44444 67 5353 14551'
 	for i in $ip_block; do iptables -I INPUT -p tcp -i ${1} --dport $i -j DROP; done
+}
+
+conf_read()
+{
+	result=$(head -1 /data/ftp/uavpal/conf/${1})
+	echo "$result" |tr -d '\r\n' |tr -d '\n'
+}
+
+at_command()
+{
+	command="$1"
+	expected_response="$2"
+	timeout="$3"
+	result=$(/data/ftp/uavpal/bin/chat -V -t $timeout '' "$command" "$expected_response" '' > /dev/${serial_ctrl_dev} < /dev/${serial_ctrl_dev}) 2>&1
+	if [ "$?" -ne "0" ]; then ulogger -s -t uavpal_at_command "... Did not receive expected output from AT command $command"; fi
+	echo "$result"
 }
 
 connect_hilink()
@@ -49,8 +71,7 @@ connect_hilink()
 	ulogger -s -t uavpal_connect_hilink "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
 	hilink_api "post" "/api/security/dmz" "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>"
 	ulogger -s -t uavpal_connect_hilink "... setting Hi-Link NAT type full cone (better zerotier performance)"
-	hilink_api "post" "/api/security/nat" "<request><NATType>0</NATType></request>"
-	#TODO: confirm whether =0 is really full cone and NOT symmetric!
+	hilink_api "post" "/api/security/nat" "<request><NATType>1</NATType></request>"
 	ulogger -s -t uavpal_connect_hilink "... querying Huawei device details via Hi-Link API"
 	hilink_dev_info=$(hilink_api "get" "/api/device/information")
 	ulogger -s -t uavpal_connect_hilink "... model: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//DeviceName)' -), hardware version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//HardwareVersion)' -)"
@@ -59,10 +80,10 @@ connect_hilink()
 
 connect_stick()
 {
-	ulogger -s -t uavpal_connect_stick "... running pppd to establish connection to mobile network using APN \"$(head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n')\""
+	ulogger -s -t uavpal_connect_stick "... running pppd to establish connection to mobile network using APN \"$(conf_read apn)\""
 	/data/ftp/uavpal/bin/pppd \
 		${serial_ppp_dev} \
-		connect "/data/ftp/uavpal/bin/chat -v -f  /data/ftp/uavpal/conf/chatscript -T `head -1 /data/ftp/uavpal/conf/apn |tr -d '\r\n' |tr -d '\n'`" \
+		connect "/data/ftp/uavpal/bin/chat -v -f  /data/ftp/uavpal/conf/chatscript -T $(conf_read apn)" \
 		noipdefault \
 		defaultroute \
 		replacedefaultroute \
@@ -78,6 +99,9 @@ connect_stick()
 	until [ -d "/proc/sys/net/ipv4/conf/${ppp_if}" ]; do usleep 100000; done
 	ulogger -s -t uavpal_connect_stick "... interface \"${ppp_if}\" is up"
 	echo $serial_ctrl_dev >/tmp/serial_ctrl_dev
+	fhverString=$(at_command "AT\^FHVER" "OK" "1" | grep "FHVER:" | tail -n 1)
+	ulogger -s -t uavpal_connect_stick "... model: $(echo "$fhverString" | cut -d " " -f 1 | cut -d "\"" -f 2), hardware version: $(echo "$fhverString" | cut -d "," -f 2 | cut -d "\"" -f 1)"
+	ulogger -s -t uavpal_connect_stick "... software version: $(echo "$fhverString" | cut -d " " -f 2 | cut -d "," -f 1)"
 }
 
 connection_handler_hilink()
@@ -86,7 +110,7 @@ connection_handler_hilink()
 		check_connection
 		if [ $? -ne 0 ]; then
 			ulogger -s -t uavpal_connection_handler_hilink "... Internet connection lost, trying to reconnect"
-			### manually trigger hangup/kill for hilink via API
+			### manually trigger hangup/kill for hilink via API, see https://github.com/arska/e3372/issues/1
 			killall -9 udhcpc
 			ifconfig ${cdc_if} down
 			ip route del default via $(cat /tmp/hilink_router_ip)

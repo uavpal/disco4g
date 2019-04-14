@@ -99,7 +99,7 @@ do
 done
 
 ###	ulogger -s -t uavpal_drone "... pushing config to SC2"
-###	/revamp old uavpal_hilink.sh script and start in background with paramter ${hilink_router_ip}
+###	revamp old uavpal_hilink.sh script and start in background with parameter ${hilink_router_ip}
 
 while true; do
 	check_connection
@@ -118,7 +118,7 @@ ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool
 ulogger -s -t uavpal_drone "... starting Glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh ${huawei_mode} &
 
-if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n').conf" ]; then
+if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(conf_read zt_networkid).conf" ]; then
 	ulogger -s -t uavpal_drone "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"
 	rm -rf /data/lib/zerotier-one 2>/dev/null
 	mkdir -p /data/lib/zerotier-one
@@ -129,15 +129,15 @@ ulogger -s -t uavpal_drone "... starting zerotier daemon"
 /data/ftp/uavpal/bin/zerotier-one -d
 
 if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
-	ulogger -s -t uavpal_drone "... (initial-)joining zerotier network ID"
+	ulogger -s -t uavpal_drone "... (initial-)joining zerotier network ID $(conf_read zt_networkid)"
 	while true
 	do
-		ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(head -1 /data/ftp/uavpal/conf/zt_networkid |tr -d '\r\n' |tr -d '\n')`
+		ztjoin_response=`/data/ftp/uavpal/bin/zerotier-one -q join $(conf_read zt_networkid)`
 		if [ "`echo $ztjoin_response |head -n1 |awk '{print $1}')`" == "200" ]; then
-			ulogger -s -t uavpal_drone "... successfully joined zerotier network ID"
+			ulogger -s -t uavpal_drone "... successfully joined zerotier network ID $(conf_read zt_networkid)"
 			break # break out of loop
 		else
-			ulogger -s -t uavpal_drone "... ERROR joining zerotier network ID: $ztjoin_response - trying again"
+			ulogger -s -t uavpal_drone "... ERROR joining zerotier network ID $(conf_read zt_networkid): $ztjoin_response - trying again"
 			sleep 1
 		fi
 	done
