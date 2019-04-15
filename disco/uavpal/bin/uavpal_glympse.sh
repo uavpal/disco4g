@@ -133,11 +133,11 @@ do
 
 	if [ "$platform" == "evinrude" ]; then
 		# Parrot Disco
-		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
+		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" -o $bat_msb == "b8" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
 		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
 	elif [ "$platform" == "ardrone3" ]; then
 		# Parrot Bebop 2
-		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" ]]; do bat_msb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 10); done
+		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" -o $bat_msb == "b8" ]]; do bat_msb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 10); done
 		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 11); done
 	fi
 	bat_volts_prev=$bat_volts
