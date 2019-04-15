@@ -66,8 +66,10 @@ connect_hilink()
 	ifconfig ${cdc_if} ${hilink_ip} netmask 255.255.255.0
 	ulogger -s -t uavpal_connect_hilink "... setting default route for $hilink_router_ip"
 	ip route add default via ${hilink_router_ip} dev ${cdc_if}
-	echo $hilink_ip >/tmp/hilink_ip
 	echo $hilink_router_ip >/tmp/hilink_router_ip
+	hilink_apn_index=$(hilink_api "get" "/api/dialup/profiles" | xmllint --xpath "string(//CurrentProfile)" -)
+	hilink_apn=$(hilink_api "get" "/api/dialup/profiles" | xmllint --xpath "string(//Profile[${hilink_apn_index}]/ApnName)" -)
+	ulogger -s -t uavpal_connect_hilink "... connecting to mobile network using APN \"${hilink_apn}\" (configured in the Hi-Link Web UI)"
 	ulogger -s -t uavpal_connect_hilink "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
 	hilink_api "post" "/api/security/dmz" "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>"
 	ulogger -s -t uavpal_connect_hilink "... setting Hi-Link NAT type full cone (better zerotier performance)"
@@ -80,7 +82,7 @@ connect_hilink()
 
 connect_stick()
 {
-	ulogger -s -t uavpal_connect_stick "... running pppd to establish connection to mobile network using APN \"$(conf_read apn)\""
+	ulogger -s -t uavpal_connect_stick "... running pppd to establish connection to mobile network using APN \"$(conf_read apn)\" (configured in the conf/apn file)"
 	/data/ftp/uavpal/bin/pppd \
 		${serial_ppp_dev} \
 		connect "/data/ftp/uavpal/bin/chat -v -f  /data/ftp/uavpal/conf/chatscript -T $(conf_read apn)" \
