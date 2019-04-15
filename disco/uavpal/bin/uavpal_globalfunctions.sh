@@ -110,7 +110,9 @@ connection_handler_hilink()
 		check_connection
 		if [ $? -ne 0 ]; then
 			ulogger -s -t uavpal_connection_handler_hilink "... Internet connection lost, trying to reconnect"
-			### manually trigger hangup/kill for hilink via API, see https://github.com/arska/e3372/issues/1
+			hilink_api "post" "/api/dialup/mobile-dataswitch" "<request><dataswitch>0</dataswitch></request>"
+			sleep 1
+			hilink_api "post" "/api/dialup/mobile-dataswitch" "<request><dataswitch>1</dataswitch></request>"
 			killall -9 udhcpc
 			ifconfig ${cdc_if} down
 			ip route del default via $(cat /tmp/hilink_router_ip)
