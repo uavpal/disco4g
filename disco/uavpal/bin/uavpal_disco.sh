@@ -71,6 +71,14 @@ do
 		rmmod usbserial
 		ulogger -s -t uavpal_drone "... connecting modem to Internet (Hi-Link)"
 		connect_hilink
+		ulogger -s -t uavpal_drone "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
+		hilink_api "post" "/api/security/dmz" "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>"
+		ulogger -s -t uavpal_drone "... setting Hi-Link NAT type full cone (better zerotier performance)"
+		hilink_api "post" "/api/security/nat" "<request><NATType>1</NATType></request>"
+		ulogger -s -t uavpal_drone "... querying Huawei device details via Hi-Link API"
+		hilink_dev_info=$(hilink_api "get" "/api/device/information")
+		ulogger -s -t uavpal_drone "... model: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//DeviceName)' -), hardware version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//HardwareVersion)' -)"
+		ulogger -s -t uavpal_drone "... software version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//SoftwareVersion)' -), WebUI version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//WebUIVersion)' -)"
 		firewall ${cdc_if}
 		ulogger -s -t uavpal_drone "... starting connection keep-alive handler in background"
 		connection_handler_hilink &
@@ -90,6 +98,10 @@ do
 		insmod /data/ftp/uavpal/mod/${kernel_mods}/bsd_comp.ko
 		ulogger -s -t uavpal_drone "... connecting modem to Internet (ppp)"
 		connect_stick
+		ulogger -s -t uavpal_drone "... querying Huawei device details via AT command"
+		fhverString=$(at_command "AT\^FHVER" "OK" "1" | grep "FHVER:" | tail -n 1)
+		ulogger -s -t uavpal_drone "... model: $(echo "$fhverString" | cut -d " " -f 1 | cut -d "\"" -f 2), hardware version: $(echo "$fhverString" | cut -d "," -f 2 | cut -d "\"" -f 1)"
+		ulogger -s -t uavpal_drone "... software version: $(echo "$fhverString" | cut -d " " -f 2 | cut -d "," -f 1)"
 		firewall ${ppp_if}
 		ulogger -s -t uavpal_drone "... starting connection keep-alive handler in background"
 		connection_handler_stick &
@@ -97,9 +109,6 @@ do
 	fi
 	usleep 100000
 done
-
-###	ulogger -s -t uavpal_drone "... pushing config to SC2"
-###	revamp old uavpal_hilink.sh script and start in background with parameter ${hilink_router_ip}
 
 while true; do
 	check_connection

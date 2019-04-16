@@ -67,17 +67,10 @@ connect_hilink()
 	ulogger -s -t uavpal_connect_hilink "... setting default route for $hilink_router_ip"
 	ip route add default via ${hilink_router_ip} dev ${cdc_if}
 	echo $hilink_router_ip >/tmp/hilink_router_ip
-	hilink_apn_index=$(hilink_api "get" "/api/dialup/profiles" | xmllint --xpath "string(//CurrentProfile)" -)
-	hilink_apn=$(hilink_api "get" "/api/dialup/profiles" | xmllint --xpath "string(//Profile[${hilink_apn_index}]/ApnName)" -)
+	hilink_profiles=$(hilink_api "get" "/api/dialup/profiles")
+	hilink_apn_index=$(echo $hilink_profiles | xmllint --xpath "string(//CurrentProfile)" -)
+	hilink_apn=$(echo $hilink_profiles | xmllint --xpath "string(//Profile[${hilink_apn_index}]/ApnName)" -)
 	ulogger -s -t uavpal_connect_hilink "... connecting to mobile network using APN \"${hilink_apn}\" (configured in the Hi-Link Web UI)"
-	ulogger -s -t uavpal_connect_hilink "... enabling Hi-Link DMZ mode (1:1 NAT for better zerotier performance)"
-	hilink_api "post" "/api/security/dmz" "<request><DmzStatus>1</DmzStatus><DmzIPAddress>${hilink_ip}</DmzIPAddress></request>"
-	ulogger -s -t uavpal_connect_hilink "... setting Hi-Link NAT type full cone (better zerotier performance)"
-	hilink_api "post" "/api/security/nat" "<request><NATType>1</NATType></request>"
-	ulogger -s -t uavpal_connect_hilink "... querying Huawei device details via Hi-Link API"
-	hilink_dev_info=$(hilink_api "get" "/api/device/information")
-	ulogger -s -t uavpal_connect_hilink "... model: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//DeviceName)' -), hardware version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//HardwareVersion)' -)"
-	ulogger -s -t uavpal_connect_hilink "... software version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//SoftwareVersion)' -), WebUI version: $(echo "$hilink_dev_info" | xmllint --xpath 'string(//WebUIVersion)' -)"
 }
 
 connect_stick()
@@ -101,9 +94,6 @@ connect_stick()
 	until [ -d "/proc/sys/net/ipv4/conf/${ppp_if}" ]; do usleep 100000; done
 	ulogger -s -t uavpal_connect_stick "... interface \"${ppp_if}\" is up"
 	echo $serial_ctrl_dev >/tmp/serial_ctrl_dev
-	fhverString=$(at_command "AT\^FHVER" "OK" "1" | grep "FHVER:" | tail -n 1)
-	ulogger -s -t uavpal_connect_stick "... model: $(echo "$fhverString" | cut -d " " -f 1 | cut -d "\"" -f 2), hardware version: $(echo "$fhverString" | cut -d "," -f 2 | cut -d "\"" -f 1)"
-	ulogger -s -t uavpal_connect_stick "... software version: $(echo "$fhverString" | cut -d " " -f 2 | cut -d "," -f 1)"
 }
 
 connection_handler_hilink()
