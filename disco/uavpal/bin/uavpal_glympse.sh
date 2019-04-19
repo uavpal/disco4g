@@ -72,22 +72,7 @@ ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(
 message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
 title="${droneName}'s GPS location"
 
-phone_no="$(conf_read phonenumber)"
-if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
-	if [ "$1" == "stick" ]; then
-		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via ${serial_ctrl_dev})"
-		at_command "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${message}\32" "OK" "2"
-	elif [ "$1" == "hilink" ]; then
-		ulogger -s -t uavpal_glympse "... sending SMS with Glympse link to ${phone_no} (via Hi-Link API)"
-		hilink_api "post" "/api/sms/send-sms" "<request><Index>-1</Index><Phones><Phone>${phone_no}</Phone></Phones><Sca></Sca><Content>${message}</Content><Length>-1</Length><Reserved>-1</Reserved><Date>-1</Date></request>"
-	fi
-fi
-
-pb_access_token="$(conf_read pushbullet)"
-if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
-	ulogger -s -t uavpal_glympse "... sending push notification"
-	/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$title"'", "body": "'"$message"'"}'
-fi
+send_message "$message" "$title"
 
 ulogger -s -t uavpal_glympse "... Glympse API: setting drone thumbnail image"
 if [ "$platform" == "evinrude" ]; then
@@ -163,7 +148,7 @@ do
 		fi
 
 		# reading out the modem's connection type and ignal strength
-		if [ "$1" == "stick" ]; then
+		if [ ! -f "/tmp/hilink_router_ip" ]; then
 			modeString=$(at_command "AT\^SYSINFOEX" "OK" "1" | grep "SYSINFOEX:" | tail -n 1)
 			modeNum=`echo $modeString | cut -d "," -f 8`
 			if [ $modeNum -ge 101 ]; then
@@ -183,7 +168,7 @@ do
 				signalPercentage="n/a"
 			fi
 			signal="$mode/$signalPercentage"
-		elif [ "$1" == "hilink" ]; then
+		else
 			modeStr=$(hilink_api "get" "/api/device/information" | xmllint --xpath 'string(//workmode)' -)
 			if [ "$modeStr" == "LTE" ]; then
 				mode="4G"

@@ -55,6 +55,26 @@ at_command()
 	echo "$result"
 }
 
+send_message()
+{
+	phone_no="$(conf_read phonenumber)"
+	if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
+		if [ ! -f "/tmp/hilink_router_ip" ]; then
+			ulogger -s -t uavpal_send_message "... sending SMS to ${phone_no} (via ${serial_ctrl_dev})"
+			at_command "AT+CMGF=1\rAT+CMGS=\"${phone_no}\"\r${1}\32" "OK" "2"
+		else
+			ulogger -s -t uavpal_send_message "... sending SMS to ${phone_no} (via Hi-Link API)"
+			hilink_api "post" "/api/sms/send-sms" "<request><Index>-1</Index><Phones><Phone>${phone_no}</Phone></Phones><Sca></Sca><Content>${1}</Content><Length>-1</Length><Reserved>-1</Reserved><Date>-1</Date></request>"
+		fi
+	fi
+	
+	pb_access_token="$(conf_read pushbullet)"
+	if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
+		ulogger -s -t uavpal_send_message "... sending push notification (via Pushbullet API)"
+		/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$2"'", "body": "'"$1"'"}'
+	fi
+}
+
 connect_hilink()
 {
 	ulogger -s -t uavpal_connect_hilink "... bringing up Hi-Link network interface"

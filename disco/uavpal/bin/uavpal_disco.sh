@@ -63,7 +63,6 @@ while true
 do
 	# -=-=-=-=-= Hi-Link mode =-=-=-=-=-
 	if [ -d "/proc/sys/net/ipv4/conf/${cdc_if}" ]; then
-		huawei_mode="hilink"
 		ulogger -s -t uavpal_drone "... detected Huawei USB modem in Hi-Link mode"
 		ulogger -s -t uavpal_drone "... unloading Stick Mode kernel modules (not required for Hi-Link firmware)"
 		rmmod option
@@ -87,7 +86,6 @@ do
 	fi
 	# -=-=-=-=-= Stick mode =-=-=-=-=-
 	if [ -c "/dev/${serial_ctrl_dev}" ]; then
-		huawei_mode="stick"
 		ulogger -s -t uavpal_drone "... detected Huawei USB modem in Stick mode"
 		ulogger -s -t uavpal_drone "... loading ppp kernel modules"
 		insmod /data/ftp/uavpal/mod/${kernel_mods}/crc-ccitt.ko
@@ -125,7 +123,7 @@ ulogger -s -t uavpal_drone "... setting date/time using ntp"
 ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool.ntp.org -p 3.debian.pool.ntp.org
 
 ulogger -s -t uavpal_drone "... starting Glympse script for GPS tracking"
-/data/ftp/uavpal/bin/uavpal_glympse.sh ${huawei_mode} &
+/data/ftp/uavpal/bin/uavpal_glympse.sh &
 
 if [ -d "/data/lib/zerotier-one/networks.d" ] && [ ! -f "/data/lib/zerotier-one/networks.d/$(conf_read zt_networkid).conf" ]; then
 	ulogger -s -t uavpal_drone "... zerotier config's network ID does not match zt_networkid config - removing zerotier data directory to allow join of new network ID"

@@ -23,6 +23,10 @@ iptables -F INPUT
 ulogger -s -t uavpal_drone "... clearing default route"
 ip route del default via $(cat /tmp/hilink_router_ip)
 
+ulogger -s -t uavpal_drone "... removing temp files"
+rm /tmp/serial_ctrl_dev
+rm /tmp/hilink_router_ip
+
 ulogger -s -t uavpal_drone "... removing lock files"
 rm /tmp/lock/uavpal_disco
 rm /tmp/lock/uavpal_bebop2
