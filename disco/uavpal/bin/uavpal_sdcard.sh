@@ -4,7 +4,6 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
 
 # variables
-title="SD card event"
 platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
 serial_ctrl_dev=`head -1 /tmp/serial_ctrl_dev |tr -d '\r\n' |tr -d '\n'`
 block_dev="$(echo $2 | cut -d "/" -f 3)"
@@ -24,6 +23,7 @@ fi
 if [ "$1" == "add" ]; then
 	ulogger -s -t uavpal_sdcard "... block device ${block_dev} has been detected, trying to mount"
 	mount -t vfat -o rw,noatime /dev/${block_dev} ${media_path}
+	title="SD card inserted"
 	if [ $? -ne 0 ]; then
 		message="could not mount block device ${block_dev} - please ensure the SD card's file system is FAT32 (and not ExFAT!)"
 		ulogger -s -t uavpal_sdcard "... ${message}. Exiting!"
@@ -41,6 +41,7 @@ elif [ "$1" == "remove" ]; then
 	umount -f $media_path
 	diskfree=$(df -h | grep internal_000)
 	message="photos and videos will now be stored on the drone's internal memory (capacity: $(echo $diskfree | awk '{print $2}') / available: $(echo $diskfree | awk '{print $4}'))"
+	title="SD card removed"
 	ulogger -s -t uavpal_sdcard "... ${message}"
 	send_message "$message" "$title"
 	mkdir ${media_path}
