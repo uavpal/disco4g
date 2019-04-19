@@ -6,9 +6,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
 # variables
 platform=$(grep 'ro.parrot.build.product' /etc/build.prop | cut -d'=' -f 2)
 serial_ctrl_dev=`head -1 /tmp/serial_ctrl_dev |tr -d '\r\n' |tr -d '\n'`
-block_dev="$(echo $2 | cut -d "/" -f 3)"
-attempt_num=1
-mount_timeout=15
+partition="$(echo $2 | cut -d "/" -f 3)"
+disk="$(echo $partition | rev | cut -c 2- | rev)"
 
 # functions
 . /data/ftp/uavpal/bin/uavpal_globalfunctions.sh
@@ -21,24 +20,28 @@ elif [ "$platform" == "ardrone3" ]; then
 fi
 
 if [ "$1" == "add" ]; then
-	ulogger -s -t uavpal_sdcard "... block device ${block_dev} has been detected, trying to mount"
-	mount -t vfat -o rw,noatime /dev/${block_dev} ${media_path}
+	last_partition=$(ls /dev/sda? | tail -n 1)
+	if [ "$last_partition" != "/dev/${partition}" ]; then
+		exit 1 # only proceed if the last partition has triggered the script (necessary for GPT partition tables)
+	fi
+	ulogger -s -t uavpal_sdcard "... disk ${disk} has been detected, trying to mount its last partition ${partition}"
 	title="SD card inserted"
+	mount -t vfat -o rw,noatime /dev/${partition} ${media_path}
 	if [ $? -ne 0 ]; then
-		message="could not mount block device ${block_dev} - please ensure the SD card's file system is FAT32 (and not ExFAT!)"
+		message="could not mount SD card partition ${partition} - please ensure the SD card's file system is FAT32 (and not exFAT!)"
 		ulogger -s -t uavpal_sdcard "... ${message}. Exiting!"
 		send_message "$message" "$title"
 		exit 1
 	fi
-	ulogger -s -t uavpal_sdcard "... block device ${block_dev} has been mounted successfully"
-	diskfree=$(df -h | grep ${block_dev})
+	ulogger -s -t uavpal_sdcard "... partition ${partition} has been mounted successfully"
+	diskfree=$(df -h | grep ${partition})
 	message="photos and videos will now be stored on the SD card (capacity: $(echo $diskfree | awk '{print $2}') / available: $(echo $diskfree | awk '{print $4}'))"
 	ulogger -s -t uavpal_sdcard "... ${message}"
 	send_message "$message" "$title"
 
 elif [ "$1" == "remove" ]; then
-	ulogger -s -t uavpal_sdcard "... block device ${block_dev} has been removed, umounting"
-	umount -f $media_path
+	ulogger -s -t uavpal_sdcard "... disk ${disk} has been removed"
+	umount -f /dev/${media_path}
 	diskfree=$(df -h | grep internal_000)
 	message="photos and videos will now be stored on the drone's internal memory (capacity: $(echo $diskfree | awk '{print $2}') / available: $(echo $diskfree | awk '{print $4}'))"
 	title="SD card removed"

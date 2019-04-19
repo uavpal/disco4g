@@ -31,6 +31,7 @@ ulogger -s -t uavpal_drone "... removing lock files"
 rm /tmp/lock/uavpal_disco
 rm /tmp/lock/uavpal_bebop2
 rm /tmp/lock/uavpal_unload
+rm /tmp/lock/uavpal_sdcard_remove
 
 ulogger -s -t uavpal_drone "... unloading kernel modules"
 rmmod xt_tcpudp
