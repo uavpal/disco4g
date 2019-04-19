@@ -1,4 +1,4 @@
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_disco /data/ftp/uavpal/bin/uavpal_disco.sh"
 ACTION=="remove", SUBSYSTEM=="usb", ATTRS{idVendor}=="12d1", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_unload /data/ftp/uavpal/bin/uavpal_unload.sh"
-ACTION=="add", KERNEL=="*sd[a-z][1-4]*", SUBSYSTEM=="block", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_sdcard_add /data/ftp/uavpal/bin/uavpal_sdcard.sh add '%E{DEVNAME}'"
-ACTION=="remove", KERNEL=="*sd[a-z][1-4]*", SUBSYSTEM=="block", RUN+="/data/ftp/uavpal/bin/uavpal_sdcard.sh remove '%E{DEVNAME}'"
+ACTION=="add", KERNEL=="*sd[a-z][1-4]*", SUBSYSTEM=="block", RUN+="/data/ftp/uavpal/bin/uavpal_sdcard.sh add '%E{DEVNAME}'"
+ACTION=="remove", KERNEL=="*sd[a-z][1-4]*", SUBSYSTEM=="block", RUN+="/usr/bin/flock -n /tmp/lock/uavpal_sdcard_remove /data/ftp/uavpal/bin/uavpal_sdcard.sh remove '%E{DEVNAME}'"
