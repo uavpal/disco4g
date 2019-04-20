@@ -125,7 +125,7 @@ ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool
 if [ -f /data/ftp/uavpal/conf/debug ]; then
 	debug_filename="/data/ftp/internal_000/Debug/ulog_debug_$(date +%Y%m%d%H%M%S).log"
 	ulogger -s -t uavpal_drone "... Debug mode is enabled - writing debug log to internal storage: $debug_filename"
-	kill -9 $(ps |grep ulogcat |grep debugdummy |cut -f 1 -d " ")
+	kill -9 $(ps |grep ulogcat |grep debugdummy | awk '{ print $1 }')
 	ulogcat -u -k -l -F debugdummy >$debug_filename &
 fi
 
