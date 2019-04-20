@@ -10,6 +10,7 @@ ulogger -s -t uavpal_drone "... unloading scripts and daemons"
 killall -9 uavpal_disco.sh
 killall -9 uavpal_bebop2.sh
 killall -9 uavpal_glympse.sh
+killall -9 uavpal_sdcard.sh
 killall -9 zerotier-one
 killall -9 ntpd
 killall -9 udhcpc

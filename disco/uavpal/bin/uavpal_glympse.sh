@@ -71,8 +71,7 @@ ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(
 
 message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
 title="${droneName}'s GPS location"
-
-send_message "$message" "$title"
+send_message "$message" "$title" &
 
 ulogger -s -t uavpal_glympse "... Glympse API: setting drone thumbnail image"
 if [ "$platform" == "evinrude" ]; then

@@ -57,6 +57,12 @@ at_command()
 
 send_message()
 {
+	while true; do
+		check_connection
+		if [ $? -eq 0 ]; then
+			break # break out of loop
+		fi
+	done
 	phone_no="$(conf_read phonenumber)"
 	if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
 		if [ ! -f "/tmp/hilink_router_ip" ]; then
