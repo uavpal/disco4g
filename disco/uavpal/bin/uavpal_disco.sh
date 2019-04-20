@@ -122,6 +122,13 @@ echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' >/etc/resolv.conf
 ulogger -s -t uavpal_drone "... setting date/time using ntp"
 ntpd -n -d -q -p 0.debian.pool.ntp.org -p 1.debian.pool.ntp.org -p 2.debian.pool.ntp.org -p 3.debian.pool.ntp.org
 
+if [ -f /data/ftp/uavpal/conf/debug ]; then
+	debug_filename="/data/ftp/internal_000/Debug/ulog_debug_$(date +%Y%m%d%H%M%S).log"
+	ulogger -s -t uavpal_drone "... Debug mode is enabled - writing debug log to internal storage: $debug_filename"
+	kill -9 $(ps |grep ulogcat |grep debugdummy |cut -f 1 -d " ")
+	ulogcat -u -k -l -F debugdummy >$debug_filename &
+fi
+
 ulogger -s -t uavpal_drone "... starting Glympse script for GPS tracking"
 /data/ftp/uavpal/bin/uavpal_glympse.sh &
 
