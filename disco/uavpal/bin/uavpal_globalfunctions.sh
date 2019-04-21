@@ -57,12 +57,14 @@ at_command()
 
 send_message()
 {
-	while true; do
+	# delay sending of messages if modem is not yet online
+	for i in 1 2 3; do
 		check_connection
-		if [ $? -eq 0 ]; then
-			break # break out of loop
-		fi
 	done
+	if [ $? -ne 0 ]; then
+		ulogger -s -t uavpal_send_message "... Cannot send message (no connection). Exiting send_message function!"
+		exit 1 # exit function
+	fi
 	phone_no="$(conf_read phonenumber)"
 	if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
 		if [ ! -f "/tmp/hilink_router_ip" ]; then
