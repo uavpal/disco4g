@@ -27,6 +27,7 @@ ip route del default via $(cat /tmp/hilink_router_ip)
 ulogger -s -t uavpal_drone "... removing temp files"
 rm /tmp/serial_ctrl_dev
 rm /tmp/hilink_router_ip
+rm /tmp/hilink_login_required
 
 ulogger -s -t uavpal_drone "... removing lock files"
 rm /tmp/lock/uavpal_disco
