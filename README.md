@@ -122,6 +122,7 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - [Joris Dirks](https://djoris.nl)
 - Josh Mason
 - Phil
+- Sarah Davis
 - Tim Vu
 
 ## Disclaimer
