@@ -20,7 +20,7 @@ elif [ "$platform" == "ardrone3" ]; then
 fi
 
 if [ "$1" == "add" ]; then
-	last_partition=$(ls /dev/sda? | tail -n 1)
+	last_partition=$(ls /dev/${disk}? | tail -n 1)
 	if [ "$last_partition" != "/dev/${partition}" ]; then
 		exit 1 # only proceed if the last partition has triggered the script (necessary for GPT partition tables)
 	fi
@@ -31,6 +31,9 @@ if [ "$1" == "add" ]; then
 		message="could not mount SD card partition ${partition} - please ensure the SD card's file system is FAT32 (and not exFAT!)"
 		ulogger -s -t uavpal_sdcard "... ${message}. Exiting!"
 		send_message "$message" "$title" &
+		ldc set_pattern demo_low_bat true
+		sleep 3
+		ldc set_pattern idle true
 		exit 1
 	fi
 	ulogger -s -t uavpal_sdcard "... partition ${partition} has been mounted successfully"
@@ -38,10 +41,12 @@ if [ "$1" == "add" ]; then
 	message="photos and videos will now be stored on the SD card (capacity: $(echo $diskfree | awk '{print $2}') / available: $(echo $diskfree | awk '{print $4}'))"
 	ulogger -s -t uavpal_sdcard "... ${message}"
 	send_message "$message" "$title" &
-
+	ldc set_pattern color_wheel true
+	sleep 5
+	ldc set_pattern idle true
 elif [ "$1" == "remove" ]; then
 	ulogger -s -t uavpal_sdcard "... disk ${disk} has been removed"
-	umount -f /dev/${media_path}
+	umount -f ${media_path}
 	diskfree=$(df -h | grep internal_000)
 	message="photos and videos will now be stored on the drone's internal memory (capacity: $(echo $diskfree | awk '{print $2}') / available: $(echo $diskfree | awk '{print $4}'))"
 	title="SD card removed"
@@ -50,4 +55,7 @@ elif [ "$1" == "remove" ]; then
 	mkdir ${media_path}
 	chmod 755 ${media_path}
 	chown root:root ${media_path}
+	ldc set_pattern demo_low_bat true
+	sleep 3
+	ldc set_pattern idle true
 fi
