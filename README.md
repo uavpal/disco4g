@@ -15,6 +15,11 @@ Pros:
 - Allows independent real-time GPS tracking via [Glympse](https://www.glympse.com/get-glympse-app/)
 - Easy initiation of 4G/LTE connection via Skycontroller 2 button
 - Can be used for manually controlled flights as well as flight plans
+- :new: Videos and photos can be recorded to a [microSD card inside the 4G modem](https://uavpal.com/disco/faq#sdcard)
+   - More storage space available than the built-in 32 GB: great for longer flights or multiple flights where videos cannot be transferred to a PC immediately.
+   - No more long transfer time required from the Disco to a PC (usually done via USB cable or Wi-Fi).
+   - Saves battery power (and reduces charging cycles long-term) as videos don't have to be transferred on a battery-powered CHUCK.
+   - The microSD card can be unplugged after the flight and plugged into a PC - the pilot can watch the video immediately without having to transfer anything first.
 
 Cons:
 - Dependent on [4G/LTE mobile network coverage](https://en.wikipedia.org/wiki/List_of_countries_by_4G_LTE_penetration) 
@@ -61,7 +66,7 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 *Hardware:*
 - [Parrot Disco](https://www.parrot.com/us/drones/parrot-disco) / [Parrot Disco-Pro AG](https://www.parrot.com/business-solutions-us/parrot-professional/parrot-disco-pro-ag)
 - Parrot Skycontroller 2 (silver joysticks) or Skycontroller 2P (black joysticks)
-- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
+- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) or [compatible](https://github.com/uavpal/disco4g/wiki/FAQ#othermodems) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
 Note: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional)
 - USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended - order "direction up")
