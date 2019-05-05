@@ -69,7 +69,7 @@ at_command()
 send_message()
 {
 	# delay sending of messages if modem is not yet online
-	for i in 1 2 3; do
+	for i in $(seq 0 5); do
 		check_connection
 	done
 	if [ $? -ne 0 ]; then
