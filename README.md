@@ -64,30 +64,21 @@ Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App fo
 
 ## Requirements
 *Hardware:*
-- [Parrot Disco](https://www.parrot.com/us/drones/parrot-disco) / [Parrot Disco-Pro AG](https://www.parrot.com/business-solutions-us/parrot-professional/parrot-disco-pro-ag)
-- Parrot Skycontroller 2 (silver joysticks) or Skycontroller 2P (black joysticks)
+- [Parrot Disco](https://www.parrot.com/us/drones/parrot-disco) / [Parrot Disco-Pro AG](https://www.parrot.com/business-solutions-us/parrot-professional/parrot-disco-pro-ag) with firmware 1.4.1 to 1.7.1
+- Skycontroller 2 (silver joysticks) with firmware 1.0.7 - 1.0.9\
+or
+- Skycontroller 2P (black joysticks) with firmware 1.0.3 - 1.0.5
 - [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) or [compatible](https://github.com/uavpal/disco4g/wiki/FAQ#othermodems) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
 :warning: **Note**: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional)
 - USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended - order "direction up")
-- Mobile device/phone with Wi-Fi tethering and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings) (for best performance, use the same operator as the USB modem's SIM card)
+- Mobile device/phone with Wi-Fi tethering and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings) (for best performance, use the same operator as the USB modem's SIM card). Most recent iOS and Android devices work fine.
 - PC with Wi-Fi (one-time, required for initial installation)
 
 *Software:*
-- FreeFlight Pro App on tablet/phone (can be the same device providing Wi-Fi tethering)
+- FreeFlight Pro App on iOS or Android (can be the same device providing Wi-Fi tethering)
 - Zerotier account (free)
 - Glympse App for independent real-time GPS tracking (optional) - free Glympse Developer account required
-
-*<a name="supportedhw">Successfully tested using:</a>*
-- Mobile tethering device: iPhone X (iOS 11.3+)
-- 4G/LTE USB Modem: Huawei E3372h-153, E3372h-510, E3372h-607
-- USB-connected device with FreeFlight Pro App: iOS 11 - 12, most Android devices
-- Parrot Disco, Firmware 1.4.1, 1.7.0, 1.7.1
-- Parrot Skycontroller 2 (silver joysticks), Firmware 1.0.7 to 1.0.9
-- Parrot Skycontroller 2P (black joysticks), Firmware 1.0.3 to 1.0.5
-- FreeFlight Pro 5.2.0 - 5.2.4 on iOS and Android
-
-[Drop us a note](https://github.com/uavpal/disco4g/#contactcontribute) if you have successfully tested different configurations, so we can keep this list updated.
 
 ## Installation
 Please see Wiki article [Installation](https://github.com/uavpal/disco4g/wiki/Installation).
