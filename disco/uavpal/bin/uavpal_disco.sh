@@ -156,5 +156,11 @@ if [ ! -d "/data/lib/zerotier-one/networks.d" ]; then
 		fi
 	done
 fi
+
+/data/ftp/uavpal/bin/port_mapping.sh
+
+killall parachute.sh
+/data/ftp/uavpal/bin/parachute.sh &
+
 ulogger -s -t uavpal_drone "*** idle on LTE ***"
 } &
