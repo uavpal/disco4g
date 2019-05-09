@@ -15,11 +15,7 @@ Pros:
 - Allows independent real-time GPS tracking via [Glympse](https://www.glympse.com/get-glympse-app/)
 - Easy initiation of 4G/LTE connection via Skycontroller 2 button
 - Can be used for manually controlled flights as well as flight plans
-- :boom: Videos and photos can be recorded to a [microSD card inside the 4G modem](https://uavpal.com/disco/faq#sdcard)
-   - More storage space available than the built-in 32 GB: great for longer flights or multiple flights where videos cannot be transferred to a PC immediately.
-   - No more long transfer time required from the Disco to a PC (usually done via USB cable or Wi-Fi).
-   - Saves battery power (and reduces charging cycles long-term) as videos don't have to be transferred on a battery-powered CHUCK.
-   - The microSD card can be unplugged after the flight and plugged into a PC - the pilot can watch the video immediately without having to transfer anything first.
+- :boom: Videos and photos can be recorded to a [microSD card inside the 4G modem](#sdcard)
 
 Cons:
 - Dependent on [4G/LTE mobile network coverage](https://en.wikipedia.org/wiki/List_of_countries_by_4G_LTE_penetration) 
@@ -61,6 +57,17 @@ The mobile device running FreeFlight Pro (the one connected to Skycontroller 2 v
 Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android, allows independent real-time GPS tracking and shows [detailed telemetry data](https://uavpal.com/disco/faq#whyglympse) (signal strength, altitude, speed, compass, battery and latency) of the Disco via 4G/LTE. This can be particularly useful to recover the Disco in the unfortunate event of a crash or flyaway.
 
 ![Glympse App showing Disco's location](https://image.ibb.co/kwt4bn/discoglympse.png)
+
+<a name="sdcard">The latest (optional) feature of our softmod is the video and photo recording to a microSD card inside the 4G modem.
+![E3372h 4G USB modem with microSD card](https://uavpal.com/img/E3372_microSD.png)
+
+This gives you
+- More storage space available than the built-in 32 GB: great for longer flights or multiple flights where videos cannot be transferred to a PC immediately.
+- No more long transfer time required from the Disco to a PC (usually done via USB cable or Wi-Fi).
+- Saves battery power (and reduces charging cycles long-term) as videos don't have to be transferred on a battery-powered CHUCK.
+- The microSD card can be unplugged after the flight and plugged into a PC - the pilot can watch the video immediately without having to transfer anything first.
+
+:point_right: More infos in [this FAQ entry](https://uavpal.com/disco/faq#sdcard)
 
 ## Requirements
 *Hardware:*
