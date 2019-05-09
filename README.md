@@ -24,7 +24,7 @@ Pros:
 Cons:
 - Dependent on [4G/LTE mobile network coverage](https://en.wikipedia.org/wiki/List_of_countries_by_4G_LTE_penetration) 
 - Might incur mobile data cost (dependent on your mobile network operator)
-- Slightly higher latency as compared to Wi-Fi
+- [Slightly higher latency](https://uavpal.com/disco/faq#latency) as compared to Wi-Fi
 
 ## Community
 [![UAVPAL Slack Workspace](https://uavpal.com/img/slack.png)](https://uavpal.com/slack)
