@@ -33,7 +33,7 @@ We have a great and very active community on Slack, come [join us](https://uavpa
 - Because we can :grin:
 
 ## How does it work?
-![High-level connection diagram](https://preview.ibb.co/c8qPP7/disco4g_highlevel_diagram_end2end.png)
+![High-level connection diagram](https://uavpal.com/img/disco4g_highlevel_diagram_end2end_v2.png)
 
 In simple terms, the Wi-Fi connection is hijacked and routed via a tethering device (e.g. mobile phone) through a 4G/LTE cellular/mobile network to the Disco. As tethering device, any modern mobile phone can be used (iOS: "Personal Hotspot" or Android: "Portable WLAN hotspot").
 The Disco requires a 4G/LTE USB modem to be able to send and receive data via cellular/mobile networks.
