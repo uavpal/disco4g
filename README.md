@@ -56,7 +56,7 @@ The mobile device running FreeFlight Pro (the one connected to Skycontroller 2 v
 
 Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android, allows independent real-time GPS tracking and shows [detailed telemetry data](https://uavpal.com/disco/faq#whyglympse) (signal strength, altitude, speed, compass, battery and latency) of the Disco via 4G/LTE. This can be particularly useful to recover the Disco in the unfortunate event of a crash or flyaway.
 
-![Glympse App showing Disco's location](https://image.ibb.co/kwt4bn/discoglympse.png)
+![Glympse App showing Disco's location](https://uavpal.com/img/glympse_disco.jpg)
 
 <a name="sdcard">The latest (optional) feature of our softmod is the video and photo recording to a microSD card inside the 4G modem.
 ![E3372h 4G USB modem with microSD card](https://uavpal.com/img/E3372_microSD.png)
