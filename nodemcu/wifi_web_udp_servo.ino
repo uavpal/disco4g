@@ -167,7 +167,7 @@ void setup() {
   //pinMode(12, OUTPUT);
   //pinMode(15, OUTPUT);
 
-  discoTicker.attach(0.8, discoCounter);
+  discoTicker.attach(1.6, discoCounter);
 }
 
 void discoCounter() {
