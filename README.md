@@ -78,7 +78,7 @@ or
 - [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) or [compatible](https://github.com/uavpal/disco4g/wiki/FAQ#othermodems) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings) <details><summary>**Buy now!**</summary>
    Huawei E3372h-153 (Europe, Asia, Middle East, Africa)\
       &nbsp;&nbsp;&nbsp;&nbsp;[Order from AliExpress ~US$36.00](http://s.click.aliexpress.com/e/gIswgqG)\
-      &nbsp;&nbsp;&nbsp;&nbsp;[Order from Amazon ~US$32.00](https://amzn.to/2WyTdDv)\
+      &nbsp;&nbsp;&nbsp;&nbsp;[Order from Amazon ~US$42.00](https://amzn.to/2WyTdDv)\
    &nbsp;  
    Huawei E3372h-510 (USA, Latin America, Caribbean)\
       &nbsp;&nbsp;&nbsp;&nbsp;[Order from AliExpress ~US$50.00](http://s.click.aliexpress.com/e/HJ13fU8)\
