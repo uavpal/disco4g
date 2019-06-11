@@ -75,10 +75,16 @@ This gives you
 - Skycontroller 2 (silver joysticks) with firmware 1.0.7 - 1.0.9\
 or
 - Skycontroller 2P (black joysticks) with firmware 1.0.3 - 1.0.5
-- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) or [compatible](https://github.com/uavpal/disco4g/wiki/FAQ#othermodems) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)\
+- [Huawei E3372 4G USB modem](https://consumer.huawei.com/en/mobile-broadband/e3372/specs/) or [compatible](https://github.com/uavpal/disco4g/wiki/FAQ#othermodems) and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings)
+
+![Huawei E3372h Modem](https://uavpal.com/img/e3372-modem.jpg)
+
 :warning: **Note**: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
 - Antennas (2x CRC9) for the modem (optional)
-- USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 10 cm, [angle cable](https://www.aliexpress.com/wholesale?SearchText=USB+OTG+angle) recommended - order "direction up")
+- USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 15 cm, angle cable "direction up")
+
+![USB OTG Cable for Parrot Disco](https://uavpal.com/img/usbotg_cable_disco.jpg)
+
 - Mobile device/phone with Wi-Fi tethering and [SIM card](https://uavpal.com/disco/wiki/Known-Working-Mobile-Carriers-and-Settings) (for best performance, use the same operator as the USB modem's SIM card). Most recent iOS and Android devices work fine.
 - PC with Wi-Fi (one-time, required for initial installation)
 
