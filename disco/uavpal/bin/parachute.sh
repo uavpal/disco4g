@@ -1,6 +1,6 @@
 #!/bin/sh
 
-nodemcu_ip="192.168.42.25"
+nodemcu_ip="`head -1 /data/ftp/uavpal/conf/nodemcu_ip |tr -d '\r\n' |tr -d '\n'`"
 
 while true; do
 	while true; do
