@@ -144,6 +144,7 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - John Dreadwing
 - [Joris Dirks](https://djoris.nl)
 - Josh Mason
+- [Justin](https://www.youtube.com/channel/UCFkujOXRZb2Az8fUeD5tiMA)
 - Phil
 - Sarah Davis
 - Tim Vu
