@@ -52,7 +52,7 @@ Once up in the air, everything works in the same manner as with the stock Wi-Fi 
 
 The mobile device running FreeFlight Pro (the one connected to Skycontroller 2 via USB) can even be the same as the mobile tethering device/phone.
 
-[ZeroTier](https://zerotier.com) is a free online service, which we use to manage the connection between Disco and Skycontroller 2. This allows to do NAT traversal which is required due to the mobile tethering device and even some modems. Whether direct 4G/LTE-internal connections are allowed depends on your mobile network operator. ZeroTier allows to connect Skycontroller 2 to your Disco via an encrypted channel, regardless of the network topology.
+[ZeroTier](https://zerotier.com) is a free online service, which we use to manage and encrypt the connection between the Disco and Skycontroller 2. ZeroTier will find the fastest and shortest connection (e.g. by doing NAT traversal) to give you the best possible performance, regardless of the mobile operator's network topology.
 
 Additionally, [Glympse](https://www.glympse.com/get-glympse-app/), a free App for iOS/Android, allows independent real-time GPS tracking and shows [detailed telemetry data](https://uavpal.com/disco/faq#whyglympse) (signal strength, altitude, speed, compass, battery and latency) of the Disco via 4G/LTE. This can be particularly useful to recover the Disco in the unfortunate event of a crash or flyaway.
 
