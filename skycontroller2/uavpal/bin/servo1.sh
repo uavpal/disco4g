@@ -18,14 +18,14 @@ while true; do
 	keystep=0
 	evtest ${input_dev_settings} | while read line; do
 		if [ $keystep == 0 ]; then
-			if is_substring "type 1 (EV_KEY), code 294 (BTN_BASE), value 1" "$line"; then
+			if is_substring "type 1 (EV_KEY), code 293 (BTN_PINKIE), value 1" "$line"; then
 				killall servo1-timmer.sh
 				/data/lib/ftp/uavpal/bin/servo1-timmer.sh $press_seconds $servo_state $2 &	
 				servo1_button_timestamp1=$(date "+%s")
 				keystep=1
 			fi
 		else
-			if is_substring "type 1 (EV_KEY), code 288 (BTN_TRIGGER), value 0" "$line"; then
+			if is_substring "type 1 (EV_KEY), code 292 (BTN_TOP2), value 0" "$line"; then
 				servo1_button_timestamp2=$(date "+%s")
 				if [ $(($servo1_button_timestamp2-$servo1_button_timestamp1)) -le $press_seconds ]; then
 					if [ $servo_state == 0 ]; then
