@@ -33,6 +33,6 @@ echo "Remounting filesystem as read-only"
 echo "Creating zerotier-one directory"
 /data/ftp/uavpal/bin/adb shell "mkdir -p /data/lib/zerotier-one" 2>/dev/null
 echo "Creating symlink for zerotier-one's local config file"
-/data/ftp/uavpal/bin/adb shell "ln -s /data/lib/ftp/uavpal/conf/local.conf /data/lib/zerotier-one/local.conf  2>&1 |grep -v 'File exists'" 2>/dev/null
+/data/ftp/uavpal/bin/adb shell "ln -s /data/lib/ftp/uavpal/conf/local.conf /data/lib/zerotier-one/local.conf 2>&1 |grep -v 'File exists'" 2>/dev/null
 echo "All done! :)"
 echo
