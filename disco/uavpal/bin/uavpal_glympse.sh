@@ -38,6 +38,40 @@ function gpsDecimal()
 	echo $gpsDec
 }
 
+function calc_crc()
+{
+        local line=$1
+        local sum=0
+        crc_ok=0
+
+        local msglen=9
+        if [ "$platform" == "ardrone3" ]; then
+                msglen=15
+        fi
+
+        for i in $(seq 1 $msglen); do
+                local val=$((0x$(echo $line | cut -d " " -f $(($i+1)))))
+                sum=$(($sum ^ $val))
+        done
+        local crc=$((0x$(echo $line | cut -d " " -f $(($i+2)))))
+        if [ $sum -eq $crc ]; then
+                crc_ok=1
+        fi
+}
+
+function calc_volt()
+{
+        local line=$1
+        local voltpos=4
+        if [ "$platform" == "ardrone3" ]; then
+                voltpos=16
+        fi
+        local msb=$(echo $line | cut -d " " -f $voltpos)
+        local lsb=$(echo $line | cut -d " " -f $(($voltpos+1)))
+        local val=$((0x$msb$lsb))
+        bat_volts=$(printf "%d.%02d" $(($val / 1000)) $(($val % 1000 / 10)))
+}
+
 # main
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="$(conf_read glympse_apikey)"
@@ -115,23 +149,20 @@ do
 		latency="n/a"
 	fi
 
-	if [ "$platform" == "evinrude" ]; then
-		# Parrot Disco
-		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" -o $bat_msb == "b8" ]]; do bat_msb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 4); done
-		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x23 -y 1 0x08 |tail -1 | cut -d " " -f 5); done
-	elif [ "$platform" == "ardrone3" ]; then
-		# Parrot Bebop 2
-		bat_msb="00" && while [[ $bat_msb == "00" -o $bat_msb == "01" -o $bat_msb == "b8" ]]; do bat_msb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 10); done
-		bat_lsb="00" && while [[ $bat_lsb == "00" -o $bat_lsb == "01" ]]; do bat_lsb=$(i2cdump -r 0x20-0x29 -y 1 0x08 |tail -1 | cut -d " " -f 11); done
-	fi
-	bat_volts_prev=$bat_volts
-	bat_volts=$(/data/ftp/uavpal/bin/dc -e "2k $(printf "%d\n" 0x${bat_msb}${bat_lsb}) 1000 / p")
-	# skip battery voltage (use previous value) if it's higher than 13.5V - sometimes unrealistic values are returned by i2cdump
-	if [ "$(echo $bat_volts | awk '{print int($1+0.5)}')" -gt "13" ]; then bat_volts="$bat_volts_prev"; fi
-	
-	bat_percent_prev=$bat_percent
-	bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
-	if [ -z "$bat_percent" ]; then bat_percent="$bat_percent_prev"; fi
+        crc_ok=0
+        for i in $(seq 1 5); do
+                i2cline=$(i2cdump -r 0x20-0x2f -y 1 0x08)
+                calc_crc "$i2cline"
+                if [ $crc_ok -gt 0 ]; then break; fi
+        done
+        if [ $crc_ok -gt 0 ]; then
+	        bat_volts_prev=$bat_volts
+                calc_volt "$i2cline"
+	        bat_percent_prev=$bat_percent
+	        bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
+        else
+	        bat_percent="$bat_percent_prev";
+        fi
 
 	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
 	ztConn=""
