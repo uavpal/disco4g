@@ -91,6 +91,9 @@ or
 ![Huawei E3372h Modem](https://uavpal.com/img/e3372-modem.jpg)
 
 :warning: **Note**: there are different Huawei E3372 models available - please read [this FAQ entry](https://github.com/uavpal/disco4g/wiki/FAQ#e3372models) before buying to ensure your mobile network operator is supported.
+
+:warning: **Note**: the newer E3372h-**320** model does not work with the softmod currently. Some sellers on Amazon advertise the E3372h-320 as E3372h-153! 
+
 - USB OTG cable (Micro USB 2.0 Male to USB 2.0 Female, ca. 15 cm, angle cable) <details><summary>**Buy now!**</summary>
    [Order from AliExpress ~US$2.00](http://s.click.aliexpress.com/e/caih4r5I) (choose "direction up")\
    [Order fom Amazon ~US$14.00](https://amzn.to/2I4SSzC) (choose 15 cm)
