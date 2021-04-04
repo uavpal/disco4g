@@ -12,19 +12,8 @@ serial_ctrl_dev=`head -1 /tmp/serial_ctrl_dev |tr -d '\r\n' |tr -d '\n'`
 
 function parse_json()
 {
-	echo $1 | \
-	sed -e 's/[{}]/''/g' | \
-	sed -e 's/", "/'\",\"'/g' | \
-	sed -e 's/" ,"/'\",\"'/g' | \
-	sed -e 's/" , "/'\",\"'/g' | \
-	sed -e 's/","/'\"---SEPERATOR---\"'/g' | \
-	awk -F=':' -v RS='---SEPERATOR---' "\$1~/\"$2\"/ {print}" | \
-	sed -e "s/\"$2\"://" | \
-	tr -d "\n\t" | \
-	sed -e 's/\\"/"/g' | \
-	sed -e 's/\\\\/\\/g' | \
-	sed -e 's/^[ \t]*//g' | \
-	sed -e 's/^"//'  -e 's/"$//'
+	echo ${1##*\"${2}\":\"} | \
+	cut -d "\"" -f 1
 }
 
 function gpsDecimal()
@@ -101,9 +90,9 @@ ticket=$(parse_json $glympseCreateTicket id)
 ulogger -s -t uavpal_glympse "... Glympse API: creating invite"
 glympseCreateInvite=$(/data/ftp/uavpal/bin/curl -q -k -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST "https://api.glympse.com/v2/tickets/$ticket/create_invite?type=sms&address=1234567890&send=client")
 
-ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
+ulogger -s -t uavpal_glympse "... Glympse link generated: https://glympse.com/$(parse_json ${glympseCreateInvite% *} id)"
 
-message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite%_*} id)"
+message="You can track the location of your ${droneName} here: https://glympse.com/$(parse_json ${glympseCreateInvite% *} id)"
 title="${droneName}'s GPS location"
 send_message "$message" "$title" &
 
