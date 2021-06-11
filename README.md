@@ -142,7 +142,7 @@ Email: <img valign="bottom" src="https://image.ibb.co/mK4krx/uavpalmail2.png"> (
 - Andres Toomsalu
 - AussieGus
 - Brian
-- Carlo Comin
+- Carlo
 - [Dustin Dunnill](https://www.youtube.com/channel/UCVQWy-DTLpRqnuA17WZkjRQ)
 - John Dreadwing
 - [Joris Dirks](https://djoris.nl)
