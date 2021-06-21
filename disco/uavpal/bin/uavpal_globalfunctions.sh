@@ -76,6 +76,14 @@ send_message()
 		ulogger -s -t uavpal_send_message "... Cannot send message (no connection). Exiting send_message function!"
 		exit 1 # exit function
 	fi
+
+	callmebot_apikey="$(conf_read callmebot)"
+	if [ "$callmebot_apikey" != "XXXXXXXXXXXXXXXX" ]; then
+			msg=$1
+			ulogger -s -t uavpal_send_message "... sending message (via Messenger CallMeBot API)"
+			/data/ftp/uavpal/bin/curl -q -k -G --data-urlencode "text=${msg}" "https://api.callmebot.com/facebook/send.php?apikey=${callmebot_apikey}"
+	fi
+
 	phone_no="$(conf_read phonenumber)"
 	if [ "$phone_no" != "+XXYYYYYYYYY" ]; then
 		if [ ! -f "/tmp/hilink_router_ip" ]; then
