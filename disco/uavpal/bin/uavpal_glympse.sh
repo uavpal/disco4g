@@ -61,6 +61,23 @@ function calc_volt()
         bat_volts=$(printf "%d.%02d" $(($val / 1000)) $(($val % 1000 / 10)))
 }
 
+function check_volt()                                                                                                                 
+{                                                                                                                   
+        local line=$1                                                                                               
+        local voltpos=4
+        volts_ok=1                                                                                             
+        if [ "$platform" == "ardrone3" ]; then                                                                      
+                voltpos=16                                                                                          
+        fi                                                                                                            
+        local msb=$(echo $line | cut -d " " -f $voltpos)                                                            
+        local lsb=$(echo $line | cut -d " " -f $(($voltpos+1)))                                                     
+        local val=$((0x$msb$lsb))                                                                                   
+	# values under 5V are considered bogus
+        if [ $val -lt 5000 ]; then
+                volts_ok=0
+        fi
+}                                                                                                                   
+                                                                                                                   
 # main
 ulogger -s -t uavpal_glympse "... reading Glympse API key from config file"
 apikey="$(conf_read glympse_apikey)"
@@ -139,18 +156,28 @@ do
 	fi
 
         crc_ok=0
-        for i in $(seq 1 5); do
-                i2cline=$(i2cdump -r 0x20-0x2f -y 1 0x08)
+	volts_ok=0
+	# Try to get valid i2c data 10 times
+        for i in $(seq 1 10); do
+                i2cline=$(i2cdump -r 0x20-0x2f -y 1 0x08 |tail -n 1)
                 calc_crc "$i2cline"
-                if [ $crc_ok -gt 0 ]; then break; fi
+                if [ $crc_ok -gt 0 ]; then                                                           
+                        check_volt "$i2cline"
+                        if [ $volts_ok -gt 0 ]; then
+                                # correct voltage reading
+				break
+			fi                                        
+                fi                                                            
         done
-        if [ $crc_ok -gt 0 ]; then
-	        bat_volts_prev=$bat_volts
+
+	if [ $crc_ok -gt 0 -a $volts_ok -gt 0 ]; then
+	        bat_volts_prev="$bat_volts"
                 calc_volt "$i2cline"
-	        bat_percent_prev=$bat_percent
+	        bat_percent_prev="$bat_percent"
 	        bat_percent=$(ulogcat -d -v csv |grep "Battery percentage" |tail -n 1 | cut -d " " -f 4)
         else
-	        bat_percent="$bat_percent_prev";
+		bat_volts="$bat_volts_prev"
+	        bat_percent="$bat_percent_prev"
         fi
 
 	ip_sc2=`netstat -nu |grep 9988 | head -1 | awk '{ print $5 }' | cut -d ':' -f 1`
