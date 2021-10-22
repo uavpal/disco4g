@@ -59,7 +59,7 @@ if [ "$1" == "add" ]; then
 	fi
 	ulogger -s -t uavpal_sdcard "... disk ${disk} has been detected, trying to mount its last partition ${partition}"
 	title="SD card inserted"
-	mount -t vfat -o rw,noatime /dev/${partition} ${media_path}
+	mount -o rw,noatime /dev/${partition} ${media_path}
 	if [ $? -ne 0 ]; then
 		message="could not mount SD card partition ${partition} - please ensure the SD card's file system is FAT32 (and not exFAT!)"
 		ulogger -s -t uavpal_sdcard "... ${message}. Exiting!"
