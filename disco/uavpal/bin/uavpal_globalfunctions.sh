@@ -2,8 +2,8 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
 
 # variables
-#curl=/data/ftp/uavpal/bin/curl
-curl=`which curl`
+curl=/data/ftp/uavpal/bin/curl
+#curl=`which curl`
 
 hilink_api()
 {
