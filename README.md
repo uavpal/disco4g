@@ -72,7 +72,7 @@ This gives you
 ## Requirements
 *Hardware:*
 - [Parrot Disco](https://www.parrot.com/us/drones/parrot-disco) / [Parrot Disco-Pro AG](https://www.parrot.com/business-solutions-us/parrot-professional/parrot-disco-pro-ag) with firmware 1.4.1 to 1.7.1 <details><summary>**Buy now!**</summary>
-   [Order fom Amazon ~US$850.00](https://amzn.to/2I7NTOM)
+   [Order fom Amazon ~US$850.00](https://amzn.to/3JzeUHN)
 </details>
 
 - Skycontroller 2 (silver joysticks) with firmware 1.0.7 - 1.0.9\
