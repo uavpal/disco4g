@@ -1,3 +1,10 @@
+# exports
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
+
+# variables
+curl=/data/ftp/uavpal/bin/curl
+#curl=`which curl`
+
 hilink_api()
 {
 # Usage: hilink_api {get,post} url-context [json-data]
@@ -13,12 +20,12 @@ hilink_api()
 	data="$3"
 
 	hilink_router_ip=$(cat /tmp/hilink_router_ip)
-	sessionInfo=$(/data/ftp/uavpal/bin/curl -s -X GET "http://${hilink_router_ip}/api/webserver/SesTokInfo" 2>/dev/null)
+	sessionInfo=$(${curl} -s -X GET "http://${hilink_router_ip}/api/webserver/SesTokInfo" 2>/dev/null)
 	if [ "$?" -ne "0" ]; then ulogger -s -t uavpal_hilink_api "... Error connecting to Hi-Link API"; fi
 	cookie=$(echo "$sessionInfo" | grep "SessionID=" | cut -b 10-147)
 	token=$(echo "$sessionInfo" | grep "TokInfo" | cut -b 10-41)
 	if [ -f /tmp/hilink_login_required ]; then
-		sessionInfoLogin=$(/data/ftp/uavpal/bin/curl -s -X POST "http://${hilink_router_ip}/api/user/login" -d "<request><Username>admin</Username><Password>$(echo -n "admin" |base64)</Password><password_type>3</password_type></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token" --dump-header - 2>/dev/null)
+		sessionInfoLogin=$(${curl} -s -X POST "http://${hilink_router_ip}/api/user/login" -d "<request><Username>admin</Username><Password>$(echo -n "admin" |base64)</Password><password_type>3</password_type></request>" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token" --dump-header - 2>/dev/null)
 		if echo -n "$sessionInfoLogin" | grep '<code>108006\|<code>108007' ; then
 			ulogger -s -t uavpal_hilink_api "... Hi-Link authentication error. Please disable password protection or set it to user=admin, password=admin"
 			return # break out function
@@ -28,7 +35,7 @@ hilink_api()
 		sessionInfoAdm=$(curl -s -X GET "http://${hilink_router_ip}/api/webserver/SesTokInfo" -H "Cookie: $cookie" 2>/dev/null)
 		token=$(echo "$sessionInfoAdm" | grep "TokInfo" | cut -b 10-41)
 	fi
-	result=$(/data/ftp/uavpal/bin/curl -s -X $method "http://${hilink_router_ip}${url}" -d "$data" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token" 2>/dev/null)
+	result=$(${curl} -s -X $method "http://${hilink_router_ip}${url}" -d "$data" -H "Cookie: $cookie" -H "__RequestVerificationToken: $token" 2>/dev/null)
 	if echo "$result" | grep "<error>" ; then
 		if [ "$(echo $result | xmllint --xpath 'string(//error/code)' -)" -eq "100003" ]; then
 			ulogger -s -t uavpal_hilink_api "... Hi-Link authentication required. Trying to login using user=admin, password=admin"
@@ -90,7 +97,7 @@ send_message()
 	pb_access_token="$(conf_read pushbullet)"
 	if [ "$pb_access_token" != "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ]; then
 		ulogger -s -t uavpal_send_message "... sending push notification (via Pushbullet API)"
-		/data/ftp/uavpal/bin/curl -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$2"'", "body": "'"$1"'"}'
+		${curl} -q -k -u ${pb_access_token}: -X POST https://api.pushbullet.com/v2/pushes --header 'Content-Type: application/json' --data-binary '{"type": "note", "title": "'"$2"'", "body": "'"$1"'"}'
 	fi
 }
 

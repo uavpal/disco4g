@@ -1,8 +1,5 @@
 #!/bin/sh
 {
-# exports
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/ftp/uavpal/lib
-
 # variables
 cdc_if="eth1"
 # TODO: make the following dynamic if possible
